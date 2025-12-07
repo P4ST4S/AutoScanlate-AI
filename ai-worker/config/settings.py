@@ -1,7 +1,7 @@
 """Configuration settings for manga translator"""
 
 # Model Configuration
-MODEL_PATH = "./models/7b/Qwen2.5-7B-Instruct-abliterated-v2.Q4_K_M.gguf"
+MODEL_PATH = "./models/Qwen2.5-7B-Instruct-abliterated-v2.Q4_K_M.gguf"
 GPU_LAYERS = -1
 CONTEXT_WINDOW = 4096
 
