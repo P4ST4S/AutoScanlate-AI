@@ -78,16 +78,16 @@ Create a `models/` directory in the root folder and download the following:
 
 - **Model**: `Qwen2.5-7B-Instruct-abliterated-Q4_K_M.gguf`
 - **Why**: Best balance of speed/quality, fits in 12GB VRAM, and does not refuse NSFW/Contextual translations.
-- **Source**: [HuggingFace Link](https://huggingface.co/)
+- **Source**: [HuggingFace Link](https://huggingface.co/QuantFactory/Qwen2.5-7B-Instruct-abliterated-v2-GGUF)
 
 ### Detection Model (YOLO):
 
-- **Model**: `manga.pt` (Renamed from `best.pt` or `yolov8n-manga.pt`)
-- **Source**: [HuggingFace Link](https://huggingface.co/)
+- **Model**: `manga-text-detector.pt`
+- **Source**: [HuggingFace Link](https://huggingface.co/ogkalu/manga-text-detector-yolov8s/blob/main/manga-text-detector.pt)
 
 ### Fonts:
 
-Place a `.ttf` font file in the root directory (e.g., `arial.ttf` or `animeace2_reg.ttf`).
+Place a `.ttf` font file in the root directory (e.g., `arial.ttf` or `animeace2_reg.ttf`). The font `animeace2_reg.ttf` is already included in the `fonts/` folder, and used by default.
 
 ## 💻 Usage
 
