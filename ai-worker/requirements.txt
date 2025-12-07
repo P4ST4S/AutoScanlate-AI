@@ -1,0 +1,20 @@
+# --- Index pour PyTorch CUDA 12.1 ---
+--extra-index-url https://download.pytorch.org/whl/cu121
+
+# --- Core ---
+numpy<2.0.0
+opencv-python
+Pillow
+
+# --- IA Manga ---
+manga-ocr
+ultralytics
+transformers==4.46.3
+
+# --- PyTorch ---
+torch
+torchvision
+torchaudio
+
+# --- LLM ---
+llama-cpp-python

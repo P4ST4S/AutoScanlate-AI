@@ -1,0 +1,9 @@
+__pycache__/
+venv/
+.env
+/models/*.gguf
+/models/*.pt
+/models/7b/*
+/models/8b/*
+/models/14b/*
+/temp/*
