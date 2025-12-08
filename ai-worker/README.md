@@ -89,6 +89,48 @@ Create a `models/` directory in the root folder and download the following:
 
 Place a `.ttf` font file in the root directory (e.g., `arial.ttf` or `animeace2_reg.ttf`). The font `animeace2_reg.ttf` is already included in the `fonts/` folder, and used by default.
 
+## 📸 Examples
+
+See the intelligent masked inpainting in action! These examples showcase V10's ability to preserve artwork while cleanly removing text.
+
+### Example 1: Naruto
+
+<table>
+<tr>
+<td width="50%">
+<img src="exemples/exemple_naruto.png" alt="Original Naruto page" />
+<p align="center"><b>Original (Japanese)</b></p>
+</td>
+<td width="50%">
+<img src="exemples/translated_exemple_naruto.jpg" alt="Translated Naruto page" />
+<p align="center"><b>Translated (English)</b></p>
+</td>
+</tr>
+</table>
+
+### Example 2: One Piece
+
+<table>
+<tr>
+<td width="50%">
+<img src="exemples/exemple_one_piece.png" alt="Original One Piece page" />
+<p align="center"><b>Original (Japanese)</b></p>
+</td>
+<td width="50%">
+<img src="exemples/translated_exemple_one_piece.jpg" alt="Translated One Piece page" />
+<p align="center"><b>Translated (English)</b></p>
+</td>
+</tr>
+</table>
+
+**V10 Improvements Demonstrated:**
+- Clean text removal without damaging background artwork
+- Preserved bubble borders and shading
+- Accurate text positioning and sizing
+- No artifacts in overlapping bubble regions
+
+---
+
 ## 💻 Usage
 
 ### Translate a Single Page
