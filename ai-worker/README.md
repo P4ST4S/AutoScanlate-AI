@@ -4,16 +4,16 @@ A high-performance, fully local pipeline for automatically translating manga/com
 
 This project uses a combination of state-of-the-art AI models to **Detect**, **Read**, **Translate**, and **Typeset** manga pages locally on your GPU. No external APIs, no costs, and complete privacy.
 
-## 🚀 Key Features (V9)
+## 🚀 Key Features (V10)
 
 - **⚡ 100% Local & GPU Accelerated**: Powered by llama.cpp and CUDA. Optimized for NVIDIA RTX cards (runs entirely in VRAM).
 - **👁️ Smart Detection**: Uses YOLOv8 (fine-tuned on Manga109) to detect speech bubbles.
-  - **New**: Smart Box Merging algorithm to consolidate fragmented vertical text bubbles into single coherent blocks.
+  - Smart Box Merging algorithm to consolidate fragmented vertical text bubbles into single coherent blocks.
 - **📖 Robust OCR**: Utilizes MangaOCR to accurately read vertical and handwritten Japanese text.
 - **🧠 Uncensored Translation**: Integrated with Qwen 2.5 7B (Abliterated) for high-quality, unfiltered translations (supports NSFW, slang, and honorifics).
-  - **New**: Custom "Anti-Thinking" prompt engineering to prevent LLM hallucinations or internal monologues appearing in the final text.
+  - Custom "Anti-Thinking" prompt engineering to prevent LLM hallucinations or internal monologues appearing in the final text.
 - **🎨 Advanced Typesetting**:
-  - **Inpainting**: Whitens bubbles using rounded rectangles with dynamic padding.
+  - **NEW (V10)**: **Intelligent Masked Inpainting** - Uses OpenCV threshold detection and cv2.inpaint to remove ONLY dark text pixels, preserving artwork and backgrounds even when bounding boxes overlap.
   - **Pixel-Perfect Wrapping**: Custom algorithm that measures text width in pixels (not characters) to prevent words from being cut off or overlapping borders.
   - **Sanitization**: Automatically filters unsupported characters (emojis, complex symbols) to prevent font glitches.
 - **📦 Batch Processing**:
@@ -140,6 +140,12 @@ LINE_SPACING = 0.9
 TEXT_PADDING_X_PCT = 0.15
 TEXT_PADDING_Y_PCT = 0.02
 
+# Inpainting Configuration (V10+)
+INPAINT_RADIUS = 3  # Radius for cv2.inpaint algorithm
+INPAINT_DILATE_ITERATIONS = 1  # Dilation iterations for text mask
+INPAINT_DILATE_KERNEL_SIZE = 3  # Kernel size for dilation (3x3)
+INPAINT_TEXT_THRESHOLD = 180  # Threshold for detecting dark text (0-255, lower = more aggressive)
+
 # Output Configuration
 OUTPUT_QUALITY = 95  # JPEG quality
 ```
@@ -172,7 +178,7 @@ ai-worker/
 5. **LLM Translator**: Sends text to Qwen 2.5 (running on GPU via llama.cpp) (`services/translation.py`).
    - **Prompting**: "Raw translation engine" system prompt + Few-shot examples + Regex cleaning to remove `<think>` tags and prefixes.
 6. **Typesetter** (`services/typesetting.py`):
-   - Draws a white rounded rectangle over the original text.
+   - **V10**: Uses intelligent masked inpainting to remove only text pixels while preserving backgrounds and artwork.
    - Calculates optimal font size using `pixel_wrap` (dynamic width measurement).
    - Centers text vertically and horizontally.
 7. **Output**: Saves as High-Quality JPEG.
@@ -186,4 +192,35 @@ ai-worker/
 
 ---
 
-**Current Version**: V9 (Stable)
+## 📋 Changelog
+
+### V10 (Stable) - 2025-12-08
+**Major Enhancement: Intelligent Masked Inpainting**
+
+- **Feature**: Completely refactored text cleaning pipeline to use OpenCV-based masked inpainting
+  - Replaced simple rectangle erasure with intelligent text-only detection
+  - Uses `cv2.threshold` with configurable threshold (default: 180) to identify dark text pixels
+  - Applies `cv2.dilate` to expand mask and cover text anti-aliasing
+  - Uses `cv2.inpaint` (TELEA algorithm) to fill only detected text regions
+- **Benefits**:
+  - Preserves artwork and backgrounds even when bounding boxes overlap
+  - Eliminates artifacts from merged/overlapping detection boxes
+  - No damage to surrounding art in complex bubble arrangements
+- **New Configuration Options** (`config/settings.py`):
+  - `INPAINT_RADIUS` - Controls inpainting algorithm radius (default: 3)
+  - `INPAINT_DILATE_ITERATIONS` - Dilation passes for mask expansion (default: 1)
+  - `INPAINT_DILATE_KERNEL_SIZE` - Kernel size for dilation (default: 3x3)
+  - `INPAINT_TEXT_THRESHOLD` - Threshold for dark text detection 0-255 (default: 180)
+- **Files Modified**:
+  - `services/typesetting.py` - Complete rewrite of `clean_box()` method
+  - `config/settings.py` - Added inpainting configuration section
+
+### V9 (Stable)
+- Smart Box Merging algorithm for vertical text consolidation
+- Anti-Thinking prompt engineering to prevent LLM hallucinations
+- Enhanced text sanitization and pixel-perfect wrapping
+- Improved batch processing with ZIP support
+
+---
+
+**Current Version**: V10 (Stable)

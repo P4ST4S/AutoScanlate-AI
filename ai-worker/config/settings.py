@@ -12,7 +12,7 @@ YOLO_CONFIDENCE_THRESHOLD = 0.20
 # Font Configuration
 FONT_PATH = "./fonts/animeace2_reg.ttf"
 FONT_SIZE_START = 20
-FONT_SIZE_MIN = 14
+FONT_SIZE_MIN = 2
 
 # Translation Configuration
 TRANSLATION_TEMPERATURE = 0.1
@@ -24,6 +24,12 @@ BOX_BORDER_RADIUS = 65
 TEXT_PADDING_X_PCT = 0.15
 TEXT_PADDING_Y_PCT = 0.02
 LINE_SPACING = 0.9
+
+# Inpainting Configuration
+INPAINT_RADIUS = 3  # Radius for cv2.inpaint algorithm
+INPAINT_DILATE_ITERATIONS = 1  # Dilation iterations for text mask
+INPAINT_DILATE_KERNEL_SIZE = 3  # Kernel size for dilation (3x3)
+INPAINT_TEXT_THRESHOLD = 180  # Threshold for detecting dark text (0-255, lower = more aggressive)
 
 # Box Consolidation Configuration
 BOX_DISTANCE_THRESHOLD = 25

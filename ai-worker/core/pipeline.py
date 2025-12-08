@@ -39,7 +39,7 @@ class MangaPipeline:
         self.mocr = MangaOcr()
         self.translator = LocalTranslator(MODEL_PATH)
         self.typesetter = Typesetter(FONT_PATH)
-        print("✅ Pipeline Ready (V9 - Stable).")
+        print("✅ Pipeline Ready (V10 - Stable | Masked Inpainting).")
 
     def process_image(self, image_path: str, output_path: Optional[str] = None) -> Optional[str]:
         """

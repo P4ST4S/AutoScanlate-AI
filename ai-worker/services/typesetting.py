@@ -1,6 +1,8 @@
 """Typesetting service for rendering translated text"""
 
 from typing import List, Tuple
+import numpy as np
+import cv2
 from PIL import Image, ImageDraw, ImageFont
 
 from config.settings import (
@@ -11,7 +13,11 @@ from config.settings import (
     BOX_BORDER_RADIUS,
     TEXT_PADDING_X_PCT,
     TEXT_PADDING_Y_PCT,
-    LINE_SPACING
+    LINE_SPACING,
+    INPAINT_RADIUS,
+    INPAINT_DILATE_ITERATIONS,
+    INPAINT_DILATE_KERNEL_SIZE,
+    INPAINT_TEXT_THRESHOLD
 )
 
 
@@ -45,30 +51,73 @@ class Typesetter:
 
     def clean_box(self, image: Image.Image, box: List[int]) -> Image.Image:
         """
-        Clean a text box by drawing a white rectangle over it.
+        Intelligently clean a text box using masked inpainting.
+
+        This method targets ONLY the dark text pixels for removal:
+        1. Extracts the ROI (region of interest) from the bounding box
+        2. Creates a binary mask using fixed threshold to detect dark pixels (text)
+        3. Dilates the mask to cover text edges and compression artifacts
+        4. Uses cv2.inpaint to fill only the masked text pixels
+
+        This preserves artwork and backgrounds, even when boxes overlap.
 
         Args:
-            image: PIL Image to modify
+            image: PIL Image to modify (will be modified in-place)
             box: Bounding box [x1, y1, x2, y2]
 
         Returns:
             Modified image
         """
-        draw = ImageDraw.Draw(image)
         x1, y1, x2, y2 = box
-        padding = BOX_PADDING
 
-        try:
-            draw.rounded_rectangle(
-                (x1-padding, y1-padding, x2+padding, y2+padding),
-                radius=BOX_BORDER_RADIUS,
-                fill="white"
-            )
-        except Exception:
-            draw.rectangle(
-                (x1-padding, y1-padding, x2+padding, y2+padding),
-                fill="white"
-            )
+        # Convert bounding box to width/height format
+        w = x2 - x1
+        h = y2 - y1
+
+        if w <= 0 or h <= 0:
+            return image  # Skip invalid boxes
+
+        # Convert PIL image to OpenCV format (RGB -> BGR)
+        img_array = np.array(image)
+        img_bgr = cv2.cvtColor(img_array, cv2.COLOR_RGB2BGR)
+
+        # 1. Extract ROI
+        roi = img_bgr[y1:y1+h, x1:x1+w]
+
+        if roi.size == 0:
+            return image  # Skip if ROI is empty
+
+        # 2. Create Text Mask using fixed threshold
+        # Convert ROI to grayscale
+        gray_roi = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
+
+        # Apply binary threshold: pixels darker than threshold become white (255) in mask
+        # THRESH_BINARY_INV inverts: dark pixels (text) -> white, light pixels -> black
+        _, text_mask = cv2.threshold(
+            gray_roi,
+            INPAINT_TEXT_THRESHOLD,
+            255,
+            cv2.THRESH_BINARY_INV
+        )
+
+        # 3. Dilate Mask to ensure complete coverage of text anti-aliasing
+        kernel = np.ones((INPAINT_DILATE_KERNEL_SIZE, INPAINT_DILATE_KERNEL_SIZE), np.uint8)
+        dilated_mask = cv2.dilate(text_mask, kernel, iterations=INPAINT_DILATE_ITERATIONS)
+
+        # 4. Inpaint only the white pixels in the dilated mask
+        # Telea algorithm is fast and produces good results for text removal
+        cleaned_roi = cv2.inpaint(roi, dilated_mask, INPAINT_RADIUS, cv2.INPAINT_TELEA)
+
+        # 5. Paste the cleaned ROI back into the original image
+        img_bgr[y1:y1+h, x1:x1+w] = cleaned_roi
+
+        # Convert back to PIL Image (BGR -> RGB) and update the original
+        img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
+        result = Image.fromarray(img_rgb)
+
+        # Update the original image in-place
+        image.paste(result, (0, 0))
+
         return image
 
     def pixel_wrap(self, text: str, font: ImageFont.FreeTypeFont, max_width: int) -> List[str]:
