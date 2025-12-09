@@ -37,7 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Background and artwork damage in regions between adjacent speech bubbles
 - Text cleaning issues in complex bubble arrangements
 
-## [9.0.0] - 2024
+## [9.0.0] - 2025
 
 ### Added
 
@@ -58,7 +58,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Font glitches caused by unsupported characters
 - Internal monologues appearing in translated output
 
-## [8.0.0] - 2024
+## [8.0.0] - 2025
 
 ### Added
 
