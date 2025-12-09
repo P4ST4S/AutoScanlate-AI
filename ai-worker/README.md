@@ -6,6 +6,12 @@ This project uses a combination of state-of-the-art AI models to **Detect**, **R
 
 ## 🚀 Key Features (V10)
 
+**📊 Perfs (RTX 2060 12GB)**:
+
+- 29 pages/minute
+- ~1,700 pages/hour
+- Batch processing (.zip native)
+
 - **⚡ 100% Local & GPU Accelerated**: Powered by llama.cpp and CUDA. Optimized for NVIDIA RTX cards (runs entirely in VRAM).
 - **👁️ Smart Detection**: Uses YOLOv8 (fine-tuned on Manga109) to detect speech bubbles.
   - Smart Box Merging algorithm to consolidate fragmented vertical text bubbles into single coherent blocks.
@@ -124,6 +130,7 @@ See the intelligent masked inpainting in action! These examples showcase V10's a
 </table>
 
 **V10 Improvements Demonstrated:**
+
 - Clean text removal without damaging background artwork
 - Preserved bubble borders and shading
 - Accurate text positioning and sizing
@@ -237,6 +244,7 @@ ai-worker/
 ## 📋 Changelog
 
 ### V10 (Stable) - 2025-12-08
+
 **Major Enhancement: Intelligent Masked Inpainting**
 
 - **Feature**: Completely refactored text cleaning pipeline to use OpenCV-based masked inpainting
@@ -258,6 +266,7 @@ ai-worker/
   - `config/settings.py` - Added inpainting configuration section
 
 ### V9 (Stable)
+
 - Smart Box Merging algorithm for vertical text consolidation
 - Anti-Thinking prompt engineering to prevent LLM hallucinations
 - Enhanced text sanitization and pixel-perfect wrapping

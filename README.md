@@ -12,15 +12,21 @@ The project follows a Microservices architecture to ensure the heavy AI processi
 
 ## 🧩 Project Structure
 
-| Module | Status | Description |
-|--------|--------|-------------|
-| `/ai-worker` | ✅ v10.0 | The core Python engine. Handles Computer Vision, OCR, and LLM Inference on GPU. |
-| `/backend-api` | 🚧 Planned | High-performance API (Go/NestJS) to handle uploads, queues, and file serving. |
-| `/frontend` | 🚧 Planned | Modern Web UI (React) for drag-and-drop uploads and reading translated chapters. |
+| Module         | Status     | Description                                                                      |
+| -------------- | ---------- | -------------------------------------------------------------------------------- |
+| `/ai-worker`   | ✅ v10.0   | The core Python engine. Handles Computer Vision, OCR, and LLM Inference on GPU.  |
+| `/backend-api` | 🚧 Planned | High-performance API (Go/NestJS) to handle uploads, queues, and file serving.    |
+| `/frontend`    | 🚧 Planned | Modern Web UI (React) for drag-and-drop uploads and reading translated chapters. |
 
 ## ✨ Key Features (AI Worker V10)
 
 The core engine is currently fully operational.
+
+**📊 Perfs (RTX 2060 12GB)**:
+
+- 29 pages/minute
+- ~1,700 pages/hour
+- Batch processing (.zip native)
 
 - **⚡ 100% Local & Uncensored**: Powered by llama.cpp and Abliterated models. No moralizing, just translation.
 - **👁️ Smart Detection**: Uses YOLOv8 fine-tuned on Manga109 to detect speech bubbles.
@@ -72,6 +78,7 @@ See the V10 intelligent masked inpainting in action! These examples showcase the
 </table>
 
 **V10 Improvements Demonstrated:**
+
 - Clean text removal without damaging background artwork
 - Preserved bubble borders and shading
 - Accurate text positioning and sizing
