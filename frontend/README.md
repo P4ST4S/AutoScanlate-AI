@@ -1,36 +1,79 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/panel-top.svg" width="24" height="24" /> AutoScanlate AI - Frontend
 
-## Getting Started
+The modern, responsive web interface for the AutoScanlate AI pipeline. Built with Next.js 16 and styled with a custom "Manga/Japanese" aesthetic.
 
-First, run the development server:
+## <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/layers.svg" width="24" height="24" /> Tech Stack
+
+- **Framework**: [Next.js 16](https://nextjs.org/) (App Router)
+- **Language**: [TypeScript](https://www.typescriptlang.org/)
+- **Styling**: [TailwindCSS v4](https://tailwindcss.com/)
+- **Animations**: [Framer Motion](https://www.framer.com/motion/)
+- **Icons**: [Lucide React](https://lucide.dev/)
+- **Fonts**: [Next/Font](https://nextjs.org/docs/basic-features/font-optimization) (Google Fonts: Noto Sans JP & Potta One)
+
+## <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/palette.svg" width="24" height="24" /> Design System (Manga Theme)
+
+The UI follows a strict "Ink & Paper" aesthetic to match the subject matter.
+
+- **<img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/droplet.svg" width="16" height="16" /> Colors**:
+
+  - `bg-paper` (#fdfbf7): Warm white, emulating manga paper.
+  - `text-ink` (#0f0f0f): Deep black for text and borders.
+  - `accent` (#e63946): Stamp red for highlights and actions.
+
+- **<img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/type.svg" width="16" height="16" /> Typography**:
+
+  - **Headers**: _Potta One_ (Brush style).
+  - **Body**: _Noto Sans JP_ (Clean, legible).
+
+- **<img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/component.svg" width="16" height="16" /> Components**:
+  - **Buttons/Cards**: "Panel" style with thick 3px black borders and drop shadows (`box-shadow: 4px 4px 0px`).
+  - **Textures**: CSS-based "Screentone" overlays (radial gradients).
+
+## <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/rocket.svg" width="24" height="24" /> Getting Started
+
+### Prerequisites
+
+- Node.js 18+
+- pnpm (recommended)
+
+### Installation
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+cd frontend
+pnpm install
+```
+
+### Development
+
+Run the development server:
+
+```bash
 pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/folder-tree.svg" width="24" height="24" /> Project Structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load the Noto Sans JP and Potta One font families.
+```bash
+frontend/
+├── app/                  # Next.js App Router pages & layouts
+│   ├── globals.css       # Global theme variables & Tailwind config
+│   ├── layout.tsx        # Root layout (Fonts provider)
+│   └── page.tsx          # Landing page (Upload Zone)
+├── components/
+│   ├── features/         # Complex domain components (e.g., UploadZone)
+│   └── ui/               # Reusable primitives (Card, Button)
+├── lib/                  # Utilities (cn, mock-data)
+└── public/               # Static assets
+```
 
-## Learn More
+## <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/terminal.svg" width="24" height="24" /> Scripts
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Command      | Description                                 |
+| ------------ | ------------------------------------------- |
+| `pnpm dev`   | Start development server at localhost:3000  |
+| `pnpm build` | Build the application for production        |
+| `pnpm start` | Run the built production server             |
+| `pnpm lint`  | Run ESLint to check for code quality issues |
