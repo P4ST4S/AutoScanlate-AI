@@ -22,7 +22,7 @@ The project follows a Microservices architecture to ensure the heavy AI processi
 
 The core engine is currently fully operational.
 
-**<img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/bar-chart-3.svg" width="24" height="24" /> Perfs (RTX 2060 12GB)**:
+**<img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/chart-bar.svg" width="24" height="24" /> Perfs (RTX 2060 12GB)**:
 
 - 29 pages/minute
 - ~1,700 pages/hour
