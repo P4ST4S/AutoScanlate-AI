@@ -11,6 +11,12 @@ The modern, responsive web interface for the AutoScanlate AI pipeline. Built wit
 - **Icons**: [Lucide React](https://lucide.dev/)
 - **Fonts**: [Next/Font](https://nextjs.org/docs/basic-features/font-optimization) (Google Fonts: Noto Sans JP & Potta One)
 
+## <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/sparkles.svg" width="24" height="24" /> Key Features
+
+- **Upload Zone**: Drag & drop interface for `.zip` archives and images (`.png`, `.jpg`).
+- **Status Dashboard**: Real-time (mocked) tracking of translation requests with visual progress indicators.
+- **Results Viewer**: Side-by-side comparison reader for original vs. translated pages.
+
 ## <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/palette.svg" width="24" height="24" /> Design System (Manga Theme)
 
 The UI follows a strict "Ink & Paper" aesthetic to match the subject matter.
