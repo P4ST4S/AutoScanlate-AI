@@ -11,12 +11,12 @@
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-accent: var(--accent);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-border: var(--border);
+  --color-background: #fdfbf7;
+  --color-foreground: #0f0f0f;
+  --color-accent: #e63946;
+  --color-muted: #f4f1ea;
+  --color-muted-foreground: #66605b;
+  --color-border: #0f0f0f;
 
   --font-sans: var(--font-noto-sans-jp);
   --font-display: var(--font-potta-one);
