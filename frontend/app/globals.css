@@ -1,0 +1,59 @@
+@import "tailwindcss";
+
+:root {
+  /* Manga Theme Palette */
+  --background: #fdfbf7; /* Paper White */
+  --foreground: #0f0f0f; /* Ink Black */
+  --accent: #e63946; /* Stamp Red */
+  --muted: #f4f1ea; /* Slightly darker paper */
+  --muted-foreground: #66605b;
+  --border: #0f0f0f; /* Thick black borders */
+}
+
+@theme inline {
+  --color-background: #fdfbf7;
+  --color-foreground: #0f0f0f;
+  --color-accent: #e63946;
+  --color-muted: #f4f1ea;
+  --color-muted-foreground: #66605b;
+  --color-border: #0f0f0f;
+
+  --font-sans: var(--font-noto-sans-jp);
+  --font-display: var(--font-potta-one);
+
+  --animate-slide-in: slide-in 0.3s ease-out forwards;
+}
+
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+}
+
+/* Manga Panel Effect */
+.manga-panel {
+  background-color: var(--background);
+  border: 3px solid var(--border);
+  box-shadow: 4px 4px 0px var(--border);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Screentone Overlay Helper */
+.screentone-bg {
+  background-image: radial-gradient(#0f0f0f 1px, transparent 1px);
+  background-size: 10px 10px;
+  opacity: 0.1;
+}
