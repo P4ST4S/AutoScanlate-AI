@@ -12,7 +12,7 @@ export function UploadZone() {
   const [files, setFiles] = useState<File[]>([]);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
-    // Only accept zip files, but for now we accept all for demo
+    // Add all accepted files (zip archives and supported images) to the current list
     setFiles((prev) => [...prev, ...acceptedFiles]);
   }, []);
 
