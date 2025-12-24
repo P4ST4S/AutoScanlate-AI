@@ -21,8 +21,11 @@ export function UploadZone() {
     accept: {
       "application/zip": [".zip"],
       "application/x-zip-compressed": [".zip"],
+      "image/png": [".png"],
+      "image/jpeg": [".jpg", ".jpeg"],
+      "image/webp": [".webp"],
     },
-    maxFiles: 1,
+    maxFiles: 10,
   });
 
   const removeFile = (fileToRemove: File) => {
@@ -52,7 +55,7 @@ export function UploadZone() {
               {isDragActive ? "Drop it here!" : "Upload Manga"}
             </h3>
             <p className="text-muted-foreground font-medium">
-              Drag & drop your .zip file here, or click to select
+              Drag & drop your .zip file or images here, or click to select
             </p>
           </div>
         </div>
