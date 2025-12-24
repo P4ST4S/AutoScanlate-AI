@@ -1,4 +1,6 @@
 import { UploadZone } from "@/components/features/UploadZone";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 export default function Home() {
   return (
@@ -15,6 +17,11 @@ export default function Home() {
           <p className="text-xl text-muted-foreground font-medium max-w-xl mx-auto">
             AI-powered manga translation pipeline. Local, Private, Fast.
           </p>
+          <div className="pt-4">
+            <Link href="/status">
+              <Button variant="secondary">View Dashboard</Button>
+            </Link>
+          </div>
         </header>
 
         {/* Upload Section */}
