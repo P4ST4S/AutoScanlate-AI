@@ -12,11 +12,11 @@ The project follows a Microservices architecture to ensure the heavy AI processi
 
 ## <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/puzzle.svg" width="24" height="24" /> Project Structure
 
-| Module         | Status                                                                                                                         | Description                                                                      |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------- |
-| `/ai-worker`   | <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/circle-check.svg" width="24" height="24" /> v10.0   | The core Python engine. Handles Computer Vision, OCR, and LLM Inference on GPU.  |
-| `/backend-api` | <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/construction.svg" width="24" height="24" /> Planned | High-performance API (Go/NestJS) to handle uploads, queues, and file serving.    |
-| `/frontend`    | <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/construction.svg" width="24" height="24" /> Planned | Modern Web UI (React) for drag-and-drop uploads and reading translated chapters. |
+| Module         | Status                                                                                                                         | Description                                                                           |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------- |
+| `/ai-worker`   | <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/circle-check.svg" width="24" height="24" /> v10.0   | The core Python engine. Handles Computer Vision, OCR, and LLM Inference on GPU.       |
+| `/backend-api` | <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/construction.svg" width="24" height="24" /> Planned | High-performance API (Go/NestJS) to handle uploads, queues, and file serving.         |
+| `/frontend`    | <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/circle-check.svg" width="24" height="24" /> v0.1    | Modern Web UI (Next.js 16) for drag-and-drop uploads and reading translated chapters. |
 
 ## <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/sparkles.svg" width="24" height="24" /> Key Features (AI Worker V10)
 
@@ -125,7 +125,7 @@ python main.py ../my_manga_chapter.zip
 - [x] Smart Typesetting (Pixel wrapping, box merging)
 - [x] Modular Code Architecture (Config, Services, Utils separation)
 - [ ] Backend API (Go/NestJS setup, Redis integration)
-- [ ] Frontend UI (React, File upload zone, Gallery)
+- [x] Frontend UI (React, File upload zone, Gallery)
 - [ ] Docker Compose (One command deployment)
 
 ## <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/handshake.svg" width="24" height="24" /> Credits
