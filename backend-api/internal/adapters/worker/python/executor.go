@@ -70,9 +70,10 @@ func (e *pythonExecutor) Translate(
 	cmd := exec.CommandContext(ctx, e.pythonPath, mainPyPath, absInputPath)
 	cmd.Dir = e.workerPath // Set working directory to ai-worker
 
-	// Set environment variables
+	// Set environment variables with unbuffered Python output
 	cmd.Env = append(os.Environ(),
 		fmt.Sprintf("TEMP_DIR=%s", tempDir),
+		"PYTHONUNBUFFERED=1", // Force unbuffered stdout/stderr
 	)
 
 	// Capture stdout and stderr
@@ -140,11 +141,12 @@ func (e *pythonExecutor) parseStdout(reader io.Reader, onProgress ports.Progress
 	scanner := bufio.NewScanner(reader)
 	for scanner.Scan() {
 		line := scanner.Text()
-		e.logger.Debug("worker output", zap.String("line", line))
+		e.logger.Info("worker stdout", zap.String("line", line))
 
 		// Parse progress from output
 		progress, message := parseProgressLine(line)
 		if progress >= 0 {
+			e.logger.Info("parsed progress", zap.Int("progress", progress), zap.String("message", message))
 			if onProgress != nil {
 				onProgress(progress, message)
 			}
@@ -183,8 +185,9 @@ func (e *pythonExecutor) findOutputFiles(inputPath string) (*ports.TranslationOu
 
 	// Check if input was a ZIP file
 	if strings.HasSuffix(strings.ToLower(inputPath), ".zip") {
-		// Look for {name}_translated.zip in the worker directory
-		translatedZip := filepath.Join(e.workerPath, inputName+"_translated.zip")
+		// The Python worker creates the translated zip in the same directory as the input
+		inputDir := filepath.Dir(inputPath)
+		translatedZip := filepath.Join(inputDir, inputName+"_translated.zip")
 
 		if _, err := os.Stat(translatedZip); os.IsNotExist(err) {
 			return nil, fmt.Errorf("translated zip not found: %s", translatedZip)

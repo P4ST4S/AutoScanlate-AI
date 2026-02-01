@@ -10,6 +10,7 @@ var (
 	// Regex patterns for parsing Python worker output
 	processingPattern = regexp.MustCompile(`Processing:\s+(.+)`)
 	pageCountPattern  = regexp.MustCompile(`(\d+)\s+images?`)
+	progressPattern   = regexp.MustCompile(`PROGRESS:\s+(\d+)%\s+-\s+(.+)`)
 	completedPattern  = regexp.MustCompile(`Created:\s+(.+)`)
 	errorPattern      = regexp.MustCompile(`❌\s+(.+)`)
 )
@@ -17,6 +18,16 @@ var (
 // parseProgressLine parses a line from the worker's stdout and extracts progress information
 // Returns (progress percentage, message)
 func parseProgressLine(line string) (int, string) {
+	// Check for explicit progress format: "PROGRESS: 50% - Translated 5/10 pages"
+	if progressPattern.MatchString(line) {
+		matches := progressPattern.FindStringSubmatch(line)
+		if len(matches) > 2 {
+			progress, _ := strconv.Atoi(matches[1])
+			message := matches[2]
+			return progress, message
+		}
+	}
+
 	// Check for completion message: "✅ Created: chapter_translated.zip"
 	if strings.Contains(line, "✅") && completedPattern.MatchString(line) {
 		matches := completedPattern.FindStringSubmatch(line)

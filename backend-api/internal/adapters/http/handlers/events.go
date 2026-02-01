@@ -137,8 +137,17 @@ func (h *EventsHandler) StreamProgress(c *fiber.Ctx) error {
 			case update, ok := <-updates:
 				if !ok {
 					// Channel closed
+					h.logger.Debug("SSE updates channel closed",
+						zap.String("request_id", requestID.String()),
+					)
 					return
 				}
+
+				h.logger.Debug("SSE received update",
+					zap.String("request_id", requestID.String()),
+					zap.Int("progress", update.Progress),
+					zap.String("message", update.Message),
+				)
 
 				// Determine event type
 				eventType := "progress"
@@ -159,6 +168,12 @@ func (h *EventsHandler) StreamProgress(c *fiber.Ctx) error {
 					h.logger.Error("failed to write SSE event", zap.Error(err))
 					return
 				}
+
+				h.logger.Debug("SSE sent event",
+					zap.String("request_id", requestID.String()),
+					zap.String("event_type", eventType),
+					zap.Int("progress", update.Progress),
+				)
 
 				// If completed or failed, close the stream
 				if eventType == "complete" || eventType == "error" {

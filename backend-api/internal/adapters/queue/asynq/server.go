@@ -142,6 +142,11 @@ func (qs *queueServer) handleTranslationTask(ctx context.Context, task *asynq.Ta
 		}
 		if err := qs.publisher.PublishProgress(ctx, update); err != nil {
 			qs.logger.Error("failed to publish progress", zap.Error(err))
+		} else {
+			qs.logger.Debug("published progress to Redis",
+				zap.String("request_id", requestID.String()),
+				zap.Int("progress", progress),
+			)
 		}
 	}
 

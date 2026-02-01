@@ -39,7 +39,7 @@ class MangaPipeline:
         self.mocr = MangaOcr()
         self.translator = LocalTranslator(MODEL_PATH)
         self.typesetter = Typesetter(FONT_PATH)
-        print("✅ Pipeline Ready (V10 - Stable | Masked Inpainting).")
+        print("✅ Pipeline Ready (V10 - Stable | Masked Inpainting).", flush=True)
 
     def process_image(self, image_path: str, output_path: Optional[str] = None) -> Optional[str]:
         """
@@ -63,7 +63,8 @@ class MangaPipeline:
         print(f"   Processing: {os.path.basename(image_path)}")
 
         # Detect text boxes
-        results = self.detector(original_img, conf=YOLO_CONFIDENCE_THRESHOLD, verbose=False)
+        results = self.detector(
+            original_img, conf=YOLO_CONFIDENCE_THRESHOLD, verbose=False)
         boxes = []
         for r in results:
             if r.boxes:
@@ -122,34 +123,48 @@ class MangaPipeline:
         with zipfile.ZipFile(zip_path, 'r') as zip_ref:
             zip_ref.extractall(temp_dir)
 
-        # Process all images
-        count = 0
+        # Collect all image files first
+        image_files = []
         for root, _, files in os.walk(temp_dir):
             for file in files:
                 if file.lower().endswith(('.png', '.jpg', '.jpeg', '.webp', '.bmp')):
-                    full_input_path = os.path.join(root, file)
-                    new_jpg_path = self.process_image(
-                        full_input_path, output_path=full_input_path)
+                    image_files.append(os.path.join(root, file))
 
-                    if new_jpg_path and os.path.normpath(new_jpg_path) != os.path.normpath(full_input_path):
-                        try:
-                            os.remove(full_input_path)
-                        except Exception:
-                            pass
-                    count += 1
+        total_images = len(image_files)
+        print(f"📄 Found {total_images} images to process", flush=True)
 
-        print(f" -> Processed {count} images.")
+        # Process all images with progress tracking
+        for idx, full_input_path in enumerate(image_files, 1):
+            print(
+                f"   Processing: {os.path.basename(full_input_path)} ({idx}/{total_images})", flush=True)
+            new_jpg_path = self.process_image(
+                full_input_path, output_path=full_input_path)
 
-        # Create output ZIP
-        output_zip = os.path.splitext(zip_path)[0] + "_translated"
-        shutil.make_archive(output_zip, 'zip', temp_dir)
+            if new_jpg_path and os.path.normpath(new_jpg_path) != os.path.normpath(full_input_path):
+                try:
+                    os.remove(full_input_path)
+                except Exception:
+                    pass
+
+            # Report progress after each image
+            progress = int((idx / total_images) * 90) + 5  # 5-95% range
+            print(
+                f"PROGRESS: {progress}% - Translated {idx}/{total_images} pages", flush=True)
+
+        print(f" -> Processed {total_images} images.", flush=True)
+        # Create output ZIP in the same directory as input
+        zip_dir = os.path.dirname(zip_path)
+        zip_basename = os.path.splitext(os.path.basename(zip_path))[0]
+        output_zip_base = os.path.join(zip_dir, f"{zip_basename}_translated")
+        shutil.make_archive(output_zip_base, 'zip', temp_dir)
+        output_zip = output_zip_base
 
         try:
             shutil.rmtree(temp_dir)
         except Exception:
             pass
 
-        print(f"✅ Created: {output_zip}.zip")
+        print(f"✅ Created: {output_zip}.zip", flush=True)
 
     def run(self, input_path: str) -> None:
         """
