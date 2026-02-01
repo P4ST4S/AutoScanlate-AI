@@ -21,11 +21,13 @@ High-performance Go backend API for the Manga Translator project. Orchestrates f
 - [x] Basic API endpoints
 - [x] Docker Compose setup
 
-### Phase 2: Core Features (In Progress)
-- [ ] Upload handler with file validation
-- [ ] Asynq job queue integration
-- [ ] Python worker subprocess executor
-- [ ] Request/Result endpoints
+### Phase 2: Core Features ✅ Complete
+- [x] Upload handler with file validation
+- [x] Asynq job queue integration (client + server)
+- [x] Python worker subprocess executor
+- [x] Progress parsing from stdout/stderr
+- [x] Worker mode (separate process)
+- [x] End-to-end translation flow
 
 ### Phase 3: Real-time & Advanced
 - [ ] SSE progress tracking
@@ -46,6 +48,31 @@ High-performance Go backend API for the Manga Translator project. Orchestrates f
 
 ## Quick Start
 
+### 0. Prerequisites - AI Worker Setup
+
+**Before starting the backend**, ensure the AI worker is set up with its venv:
+
+```bash
+cd ../ai-worker
+
+# Create virtual environment if not exists
+python -m venv venv
+
+# Activate venv
+# Windows:
+venv\Scripts\activate
+# Linux/Mac:
+source venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Verify installation
+python -c "import torch; print('PyTorch OK')"
+
+cd ../backend-api
+```
+
 ### 1. Clone and Navigate
 
 ```bash
@@ -64,8 +91,17 @@ go mod download
 # Copy example environment file
 cp .env.example .env
 
-# Edit .env with your settings (defaults work for local development)
+# IMPORTANT: Verify PYTHON_PATH points to the ai-worker venv
+# Windows (default):
+# PYTHON_PATH=../ai-worker/venv/Scripts/python.exe
+#
+# Linux/Mac:
+# PYTHON_PATH=../ai-worker/venv/bin/python
+
+# Edit .env with your settings if needed
 ```
+
+**⚠️ Critical**: The `PYTHON_PATH` must point to the Python executable inside the `ai-worker/venv` directory, not the system Python. The ai-worker dependencies (PyTorch, llama-cpp-python, etc.) are installed in this virtual environment.
 
 ### 4. Start Database and Redis
 
@@ -96,14 +132,26 @@ migrate -path ./migrations -database "postgres://manga_user:secure_pass@localhos
 # Build
 go build -o api ./cmd/api
 
-# Run (Windows)
+# Run API server (Windows)
 ./api.exe
 
-# Run (Linux/Mac)
+# Run API server (Linux/Mac)
 ./api
+
+# Run in worker mode (processes translation jobs)
+./api --mode=worker
+
+# Or run both simultaneously (recommended)
+# Terminal 1:
+./api
+
+# Terminal 2:
+./api --mode=worker
 ```
 
 The API will start on `http://localhost:8080`.
+
+**Note**: You need BOTH the API server and worker running for full functionality. The API server handles HTTP requests and enqueues jobs, while the worker processes the translation tasks.
 
 ## API Endpoints
 
@@ -234,7 +282,7 @@ All configuration is managed through environment variables (see `.env.example`):
 | `DB_HOST` | PostgreSQL host | localhost |
 | `DB_PORT` | PostgreSQL port | 5432 |
 | `REDIS_ADDR` | Redis address | localhost:6379 |
-| `PYTHON_PATH` | Python executable path | python |
+| `PYTHON_PATH` | Python executable path (⚠️ **must be venv**) | ../ai-worker/venv/Scripts/python.exe |
 | `WORKER_PATH` | AI worker directory | ../ai-worker |
 | `WORKER_CONCURRENCY` | Max concurrent jobs | 1 |
 | `MAX_UPLOAD_SIZE` | Max file size (bytes) | 104857600 (100MB) |
@@ -306,6 +354,35 @@ docker-compose down -v
 ```
 
 ## Troubleshooting
+
+### Python Worker Fails / ModuleNotFoundError
+
+**Symptom**: Worker logs show errors like `ModuleNotFoundError: No module named 'torch'` or similar.
+
+**Cause**: The `PYTHON_PATH` is pointing to the system Python instead of the ai-worker venv.
+
+**Solution**:
+```bash
+# Verify your .env file has the correct path
+# Windows:
+PYTHON_PATH=../ai-worker/venv/Scripts/python.exe
+
+# Linux/Mac:
+PYTHON_PATH=../ai-worker/venv/bin/python
+
+# Test the Python path manually
+../ai-worker/venv/Scripts/python.exe -c "import torch; print('OK')"
+```
+
+If you haven't created the venv yet:
+```bash
+cd ../ai-worker
+python -m venv venv
+venv\Scripts\activate  # Windows
+# or
+source venv/bin/activate  # Linux/Mac
+pip install -r requirements.txt
+```
 
 ### Database Connection Failed
 

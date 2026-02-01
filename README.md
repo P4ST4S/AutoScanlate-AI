@@ -15,7 +15,7 @@ The project follows a Microservices architecture to ensure the heavy AI processi
 | Module         | Status                                                                                                                         | Description                                                                           |
 | -------------- | ------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------- |
 | `/ai-worker`   | <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/circle-check.svg" width="24" height="24" /> v10.0   | The core Python engine. Handles Computer Vision, OCR, and LLM Inference on GPU.       |
-| `/backend-api` | <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/construction.svg" width="24" height="24" /> Planned | High-performance API (Go/NestJS) to handle uploads, queues, and file serving.         |
+| `/backend-api` | <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/circle-check.svg" width="24" height="24" /> v0.2 Phase 2 | High-performance Go API with Fiber, PostgreSQL, Asynq queue, and Python worker integration. |
 | `/frontend`    | <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/circle-check.svg" width="24" height="24" /> v0.1    | Modern Web UI (Next.js 16) for drag-and-drop uploads and reading translated chapters. |
 
 ## <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/sparkles.svg" width="24" height="24" /> Key Features (AI Worker V10)
@@ -120,13 +120,30 @@ python main.py ../my_manga_chapter.zip
 
 ## <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/map.svg" width="24" height="24" /> Roadmap
 
+### AI Worker
 - [x] Core AI Pipeline (Detection, OCR, Translation, Inpainting)
 - [x] GPU Optimization (VRAM management, 4-bit quantization)
 - [x] Smart Typesetting (Pixel wrapping, box merging)
 - [x] Modular Code Architecture (Config, Services, Utils separation)
-- [ ] Backend API (Go/NestJS setup, Redis integration)
-- [x] Frontend UI (React, File upload zone, Gallery)
+
+### Backend API
+- [x] Go/Fiber HTTP server with hexagonal architecture
+- [x] PostgreSQL database with migrations
+- [x] Asynq + Redis job queue
+- [x] Python worker subprocess integration
+- [x] File upload and validation
+- [ ] SSE real-time progress tracking (Phase 3)
+- [ ] Production Docker deployment (Phase 4)
+
+### Frontend
+- [x] Frontend UI (Next.js 16, File upload zone, Gallery)
+- [ ] API integration with backend
+- [ ] Real-time progress updates
+
+### Infrastructure
 - [ ] Docker Compose (One command deployment)
+- [ ] CI/CD pipeline
+- [ ] Production monitoring
 
 ## <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/handshake.svg" width="24" height="24" /> Credits
 
