@@ -16,11 +16,11 @@ The project follows a Microservices architecture to ensure the heavy AI processi
 
 ## <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/puzzle.svg" width="24" height="24" /> Project Structure
 
-| Module         | Status                                                                                                                                   | Description                                                                                                      |
-| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `/ai-worker`   | <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/circle-check.svg" width="24" height="24" /> v10.0             | The core Python engine. Handles Computer Vision, OCR, and LLM Inference on GPU.                                  |
-| `/backend-api` | <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/circle-check.svg" width="24" height="24" /> **v2.0** Complete | High-performance Go API with **real-time SSE progress**, Redis pub/sub, ZIP extraction, and nested file support. |
-| `/frontend`    | <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/circle-check.svg" width="24" height="24" /> v1.0              | Modern Web UI (Next.js 16) for drag-and-drop uploads and reading translated chapters.                            |
+| Module         | Status                                                                                                                          | Description                                                                                                      |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `/ai-worker`   | <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/circle-check.svg" width="24" height="24" /> v10.0    | The core Python engine. Handles Computer Vision, OCR, and LLM Inference on GPU.                                  |
+| `/backend-api` | <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/circle-check.svg" width="24" height="24" /> **v2.0** | High-performance Go API with **real-time SSE progress**, Redis pub/sub, ZIP extraction, and nested file support. |
+| `/frontend`    | <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/circle-check.svg" width="24" height="24" /> v1.0     | Modern Web UI (Next.js 16) for drag-and-drop uploads and reading translated chapters.                            |
 
 ## <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/rocket.svg" width="24" height="24" /> What's New in Backend v2.0
 
