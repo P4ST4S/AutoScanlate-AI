@@ -1,0 +1,46 @@
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+backend-api
+api
+
+# Test binary
+*.test
+
+# Output of the go coverage tool
+*.out
+
+# Dependency directories
+vendor/
+
+# Go workspace file
+go.work
+
+# Environment variables
+.env
+
+# Storage (uploaded files)
+storage/uploads/*
+storage/originals/*
+storage/translated/*
+storage/temp/*
+
+# Keep directory structure
+!storage/uploads/.gitkeep
+!storage/originals/.gitkeep
+!storage/translated/.gitkeep
+!storage/temp/.gitkeep
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db

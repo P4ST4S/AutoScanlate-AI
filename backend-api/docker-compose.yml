@@ -1,0 +1,76 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: manga-translator-db
+    environment:
+      POSTGRES_USER: manga_user
+      POSTGRES_PASSWORD: secure_pass
+      POSTGRES_DB: manga_translator
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./migrations:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U manga_user"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - manga-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: manga-translator-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks:
+      - manga-network
+
+  # Uncomment when ready to build the API
+  # api:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   container_name: manga-translator-api
+  #   ports:
+  #     - "8080:8080"
+  #   environment:
+  #     PORT: 8080
+  #     DB_HOST: postgres
+  #     DB_PORT: 5432
+  #     DB_USER: manga_user
+  #     DB_PASSWORD: secure_pass
+  #     DB_NAME: manga_translator
+  #     REDIS_ADDR: redis:6379
+  #     PYTHON_PATH: python3
+  #     WORKER_PATH: /app/ai-worker
+  #     STORAGE_PATH: /app/storage
+  #     CORS_ORIGINS: http://localhost:3000
+  #   volumes:
+  #     - ./storage:/app/storage
+  #     - ../ai-worker:/app/ai-worker:ro
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #     redis:
+  #       condition: service_healthy
+  #   networks:
+  #     - manga-network
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  manga-network:
+    driver: bridge

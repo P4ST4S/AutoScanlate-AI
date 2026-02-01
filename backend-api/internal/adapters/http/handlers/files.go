@@ -1,0 +1,56 @@
+package handlers
+
+import (
+	"path/filepath"
+	"strings"
+
+	"github.com/P4ST4S/manga-translator/backend-api/internal/infrastructure/config"
+	"github.com/gofiber/fiber/v2"
+	"go.uber.org/zap"
+)
+
+type FilesHandler struct {
+	storagePath string
+	logger      *zap.Logger
+}
+
+func NewFilesHandler(cfg *config.Config, logger *zap.Logger) *FilesHandler {
+	return &FilesHandler{
+		storagePath: cfg.Storage.Path,
+		logger:      logger,
+	}
+}
+
+// ServeFile handles GET /api/files/:requestId/:type/:filename
+func (h *FilesHandler) ServeFile(c *fiber.Ctx) error {
+	requestID := c.Params("requestId")
+	fileType := c.Params("type")
+	filename := c.Params("filename")
+
+	// Validate type
+	validTypes := map[string]bool{
+		"uploads":    true,
+		"originals":  true,
+		"translated": true,
+	}
+
+	if !validTypes[fileType] {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "invalid file type",
+		})
+	}
+
+	// Sanitize filename to prevent path traversal
+	filename = filepath.Base(filename)
+	if strings.Contains(filename, "..") {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "invalid filename",
+		})
+	}
+
+	// Build file path
+	filePath := filepath.Join(h.storagePath, fileType, requestID, filename)
+
+	// Serve file
+	return c.SendFile(filePath)
+}
