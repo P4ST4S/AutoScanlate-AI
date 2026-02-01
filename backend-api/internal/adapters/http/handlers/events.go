@@ -85,15 +85,17 @@ func (h *EventsHandler) StreamProgress(c *fiber.Ctx) error {
 			"error": "failed to initialize event stream",
 		})
 	}
-	defer subscriber.Close()
+	// Note: Don't defer close here - it will be closed inside the stream writer
 
 	// Subscribe to progress updates
 	ctx, cancel := context.WithTimeout(c.Context(), 15*time.Minute)
-	defer cancel()
+	// Note: Don't defer cancel here either - it will be called inside the stream writer
 
 	updates, err := subscriber.SubscribeToProgress(ctx, requestID)
 	if err != nil {
 		h.logger.Error("failed to subscribe", zap.Error(err))
+		subscriber.Close()
+		cancel()
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "failed to subscribe to updates",
 		})
@@ -103,16 +105,23 @@ func (h *EventsHandler) StreamProgress(c *fiber.Ctx) error {
 		zap.String("request_id", requestID.String()),
 	)
 
-	// Send initial status
-	h.sendSSEEvent(c, "connected", fiber.Map{
-		"status":   request.Status,
-		"progress": request.Progress,
-		"message":  "Connected to progress stream",
-	})
-
-	// Flush to send the initial message
+	// Setup streaming
 	c.Context().Response.Header.Set("X-Accel-Buffering", "no")
 	c.Context().SetBodyStreamWriter(func(w *bufio.Writer) {
+		// Ensure cleanup when stream ends
+		defer subscriber.Close()
+		defer cancel()
+
+		// Send initial connected event
+		if err := h.writeSSEEvent(w, "connected", fiber.Map{
+			"status":   request.Status,
+			"progress": request.Progress,
+			"message":  "Connected to progress stream",
+		}); err != nil {
+			h.logger.Error("failed to send connected event", zap.Error(err))
+			return
+		}
+
 		// Keep-alive ticker
 		ticker := time.NewTicker(30 * time.Second)
 		defer ticker.Stop()

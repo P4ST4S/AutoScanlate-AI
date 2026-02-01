@@ -78,10 +78,12 @@ export function StatusList() {
     const eventSources: EventSource[] = [];
 
     processingRequests.forEach((req) => {
+      console.log(`[StatusList] Subscribing to SSE for request ${req.id}`);
       const es = subscribeToProgress(
         req.id,
         (update: ProgressUpdate) => {
           // Update progress in real-time
+          console.log(`[StatusList] Progress update for ${req.id}:`, update);
           setRequests((prev) =>
             prev.map((r) =>
               r.id === req.id
@@ -96,6 +98,7 @@ export function StatusList() {
         },
         (update: ProgressUpdate) => {
           // Completed
+          console.log(`[StatusList] Completed for ${req.id}:`, update);
           setRequests((prev) =>
             prev.map((r) =>
               r.id === req.id
@@ -107,6 +110,7 @@ export function StatusList() {
         },
         (error: string) => {
           // Error
+          console.log(`[StatusList] Error for ${req.id}:`, error);
           setRequests((prev) =>
             prev.map((r) =>
               r.id === req.id

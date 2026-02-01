@@ -1,12 +1,12 @@
 // API Client for Manga Translator Backend
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
 export interface Request {
   id: string;
   filename: string;
-  fileType: 'image' | 'zip';
-  status: 'queued' | 'processing' | 'completed' | 'failed';
+  fileType: "image" | "zip";
+  status: "queued" | "processing" | "completed" | "failed";
   progress: number;
   pageCount: number;
   thumbnail?: string;
@@ -45,17 +45,17 @@ export async function uploadFiles(files: File[]): Promise<Request> {
   const formData = new FormData();
 
   files.forEach((file) => {
-    formData.append('files', file);
+    formData.append("files", file);
   });
 
   const response = await fetch(`${API_BASE_URL}/api/translate`, {
-    method: 'POST',
+    method: "POST",
     body: formData,
   });
 
   if (!response.ok) {
     const error = await response.json();
-    throw new Error(error.error || 'Upload failed');
+    throw new Error(error.error || "Upload failed");
   }
 
   return response.json();
@@ -65,7 +65,7 @@ export async function uploadFiles(files: File[]): Promise<Request> {
 export async function getRequests(
   status?: string,
   limit: number = 20,
-  offset: number = 0
+  offset: number = 0,
 ): Promise<ListRequestsResponse> {
   const params = new URLSearchParams({
     limit: limit.toString(),
@@ -73,13 +73,13 @@ export async function getRequests(
   });
 
   if (status) {
-    params.append('status', status);
+    params.append("status", status);
   }
 
   const response = await fetch(`${API_BASE_URL}/api/requests?${params}`);
 
   if (!response.ok) {
-    throw new Error('Failed to fetch requests');
+    throw new Error("Failed to fetch requests");
   }
 
   return response.json();
@@ -90,7 +90,7 @@ export async function getRequest(id: string): Promise<Request> {
   const response = await fetch(`${API_BASE_URL}/api/requests/${id}`);
 
   if (!response.ok) {
-    throw new Error('Failed to fetch request');
+    throw new Error("Failed to fetch request");
   }
 
   return response.json();
@@ -101,7 +101,7 @@ export async function getResults(requestId: string): Promise<Result> {
   const response = await fetch(`${API_BASE_URL}/api/results/${requestId}`);
 
   if (!response.ok) {
-    throw new Error('Failed to fetch results');
+    throw new Error("Failed to fetch results");
   }
 
   return response.json();
@@ -112,41 +112,69 @@ export function subscribeToProgress(
   requestId: string,
   onProgress: (update: ProgressUpdate) => void,
   onComplete: (update: ProgressUpdate) => void,
-  onError: (error: string) => void
+  onError: (error: string) => void,
 ): EventSource {
   const eventSource = new EventSource(
-    `${API_BASE_URL}/api/requests/${requestId}/events`
+    `${API_BASE_URL}/api/requests/${requestId}/events`,
   );
 
-  eventSource.addEventListener('connected', (e) => {
-    const data = JSON.parse(e.data) as ProgressUpdate;
-    console.log('SSE connected:', data);
+  let hasCompleted = false;
+  let hasFailed = false;
+
+  eventSource.addEventListener("connected", (e) => {
+    try {
+      const data = JSON.parse(e.data) as ProgressUpdate;
+      console.log("SSE connected:", data);
+    } catch (err) {
+      console.error("Failed to parse connected event:", err, e);
+    }
   });
 
-  eventSource.addEventListener('progress', (e) => {
-    const data = JSON.parse(e.data) as ProgressUpdate;
-    onProgress(data);
+  eventSource.addEventListener("progress", (e) => {
+    try {
+      const data = JSON.parse(e.data) as ProgressUpdate;
+      console.log("SSE progress:", data);
+      onProgress(data);
+    } catch (err) {
+      console.error("Failed to parse progress event:", err, e);
+    }
   });
 
-  eventSource.addEventListener('complete', (e) => {
-    const data = JSON.parse(e.data) as ProgressUpdate;
-    onComplete(data);
-    eventSource.close();
+  eventSource.addEventListener("complete", (e) => {
+    try {
+      const data = JSON.parse(e.data) as ProgressUpdate;
+      console.log("SSE complete:", data);
+      hasCompleted = true;
+      onComplete(data);
+      eventSource.close();
+    } catch (err) {
+      console.error("Failed to parse complete event:", err, e);
+    }
   });
 
-  eventSource.addEventListener('error', (e: Event) => {
+  // Handle custom SSE 'error' event from server (not the native onerror)
+  eventSource.addEventListener("error", (e) => {
     const messageEvent = e as MessageEvent;
     if (messageEvent.data) {
-      const data = JSON.parse(messageEvent.data) as ProgressUpdate;
-      onError(data.message);
-    } else {
-      onError('Connection error');
+      try {
+        const data = JSON.parse(messageEvent.data) as ProgressUpdate;
+        console.log("SSE error event:", data);
+        hasFailed = true;
+        onError(data.message);
+        eventSource.close();
+      } catch (parseErr) {
+        console.error("Failed to parse SSE error event:", parseErr);
+      }
     }
-    eventSource.close();
   });
 
-  eventSource.onerror = () => {
-    // Connection error or closed by server
+  // Handle native EventSource errors (connection issues)
+  eventSource.onerror = (err) => {
+    console.log("SSE connection error or closed", err);
+    // Only treat as error if we haven't completed successfully
+    if (!hasCompleted && !hasFailed) {
+      onError("Connection interrupted");
+    }
     eventSource.close();
   };
 
@@ -154,6 +182,10 @@ export function subscribeToProgress(
 }
 
 // Build file URL
-export function getFileUrl(requestId: string, type: 'uploads' | 'originals' | 'translated', filename: string): string {
+export function getFileUrl(
+  requestId: string,
+  type: "uploads" | "originals" | "translated",
+  filename: string,
+): string {
   return `${API_BASE_URL}/api/files/${requestId}/${type}/${filename}`;
 }
