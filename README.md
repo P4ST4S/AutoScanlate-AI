@@ -4,6 +4,10 @@ An automated, privacy-focused, GPU-accelerated pipeline to translate manga and c
 
 This project aims to provide a full-stack solution (Frontend, Backend, and AI Worker) to detect text bubbles, perform OCR, translate contextually using LLMs, and typeset the result back into the original image—all without external APIs or recurring costs.
 
+## <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/play-circle.svg" width="24" height="24" /> Demo
+
+![Demo](docs/demo.gif)
+
 ## <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/layers.svg" width="24" height="24" /> Architecture
 
 The project follows a Microservices architecture to ensure the heavy AI processing doesn't block the web server.
