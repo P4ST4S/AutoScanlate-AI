@@ -115,6 +115,21 @@ See the V10 intelligent masked inpainting in action! These examples showcase the
 
 ---
 
+## <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/download.svg" width="24" height="24" /> Download Models
+
+Before starting, download the required AI models:
+
+**📦 [Download Models (Google Drive)](https://drive.google.com/drive/folders/18nlj90zpwe57XLsK2slb9OxJwcgNMqQM?usp=sharing)**
+
+Required files:
+
+- `Qwen2.5-7B-Instruct-abliterated-v2.Q4_K_M.gguf` (~4.6 GB) - LLM for translation
+- `manga-text-detector.pt` - YOLO model for text bubble detection
+
+Place these files in the `ai-worker/models/` directory.
+
+---
+
 ## <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/rocket.svg" width="24" height="24" /> Quick Start
 
 ### Option 1: Full Stack with Docker (Recommended)

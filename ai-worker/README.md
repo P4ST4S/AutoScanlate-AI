@@ -78,18 +78,22 @@ pip install llama-cpp-python --no-cache-dir --force-reinstall
 
 ## 🤖 Models Setup
 
-Create a `models/` directory in the root folder and download the following:
+### Download Required Models
+
+**📦 [Download All Models (Google Drive)](https://drive.google.com/drive/folders/18nlj90zpwe57XLsK2slb9OxJwcgNMqQM?usp=sharing)**
+
+Create a `models/` directory in the root folder and place the following files:
 
 ### Translation Model (LLM):
 
-- **Model**: `Qwen2.5-7B-Instruct-abliterated-Q4_K_M.gguf`
+- **Model**: `Qwen2.5-7B-Instruct-abliterated-v2.Q4_K_M.gguf` (~4.6 GB)
 - **Why**: Best balance of speed/quality, fits in 12GB VRAM, and does not refuse NSFW/Contextual translations.
-- **Source**: [HuggingFace Link](https://huggingface.co/QuantFactory/Qwen2.5-7B-Instruct-abliterated-v2-GGUF)
+- **Alternative Source**: [HuggingFace Link](https://huggingface.co/QuantFactory/Qwen2.5-7B-Instruct-abliterated-v2-GGUF)
 
 ### Detection Model (YOLO):
 
 - **Model**: `manga-text-detector.pt`
-- **Source**: [HuggingFace Link](https://huggingface.co/ogkalu/manga-text-detector-yolov8s/blob/main/manga-text-detector.pt)
+- **Alternative Source**: [HuggingFace Link](https://huggingface.co/ogkalu/manga-text-detector-yolov8s/blob/main/manga-text-detector.pt)
 
 ### Fonts:
 
