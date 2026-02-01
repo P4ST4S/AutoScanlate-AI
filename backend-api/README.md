@@ -1,6 +1,6 @@
 # Manga Translator Backend API
 
-High-performance Go backend API for the Manga Translator project. Orchestrates file uploads, job queuing, and translation processing between the Next.js frontend and Python AI worker.
+**Version 2.0** - High-performance Go backend API for the Manga Translator project. Orchestrates file uploads, job queuing, and translation processing between the Next.js frontend and Python AI worker.
 
 ## Architecture
 
@@ -8,11 +8,36 @@ High-performance Go backend API for the Manga Translator project. Orchestrates f
 - **Database**: PostgreSQL 16+ (via pgx driver)
 - **Queue**: Asynq + Redis (for async job processing)
 - **Pattern**: Hexagonal/Clean Architecture
-- **Real-time**: Server-Sent Events (SSE) for progress tracking
+- **Real-time**: Server-Sent Events (SSE) for live progress tracking
+
+## What's New in v2.0
+
+### Real-time Progress Tracking
+
+- ✅ **Live SSE streaming** with page-by-page progress updates
+- ✅ **Python stdout unbuffering** (`PYTHONUNBUFFERED=1`) for instant progress reporting
+- ✅ **Redis pub/sub integration** for reliable progress broadcasting
+- ✅ **Connection stability** with proper error handling and cleanup
+
+### Enhanced ZIP Support
+
+- ✅ **Automatic ZIP extraction** to originals/ and translated/ directories
+- ✅ **Subdirectory support** with proper relative path handling
+- ✅ **Instant page counting** - displays total pages immediately on upload
+- ✅ **Wildcard routing** (`/api/files/:id/:type/*`) for nested file structures
+- ✅ **Database cataloging** - all pages indexed with proper paths
+
+### Improved Architecture
+
+- ✅ **Proper resource cleanup** in SSE streams (defer placement fixes)
+- ✅ **Enhanced error logging** with detailed debugging information
+- ✅ **Progress parsing** with regex patterns for structured updates
+- ✅ **Type-safe progress callbacks** throughout the pipeline
 
 ## Project Status
 
 ### Phase 1: Foundation ✅ Complete
+
 - [x] Project structure and configuration
 - [x] PostgreSQL database with migrations
 - [x] Domain entities (Request, Result)
@@ -22,6 +47,7 @@ High-performance Go backend API for the Manga Translator project. Orchestrates f
 - [x] Docker Compose setup
 
 ### Phase 2: Core Features ✅ Complete
+
 - [x] Upload handler with file validation
 - [x] Asynq job queue integration (client + server)
 - [x] Python worker subprocess executor
@@ -29,14 +55,18 @@ High-performance Go backend API for the Manga Translator project. Orchestrates f
 - [x] Worker mode (separate process)
 - [x] End-to-end translation flow
 
-### Phase 3: Real-time & Advanced ✅ Complete
-- [x] SSE progress tracking
+### Phase 3: Real-time & Advanced ✅ Complete (v2.0)
+
+- [x] SSE progress tracking with live updates
 - [x] Redis pub/sub integration
 - [x] Real-time progress broadcasting
 - [x] Event streaming (connected/progress/complete/error)
+- [x] ZIP extraction and cataloging
+- [x] Subdirectory support for complex archives
 - [ ] Cleanup service (Phase 4)
 
 ### Phase 4: Production ✅ Complete
+
 - [x] Docker multi-stage build
 - [x] Docker Compose orchestration
 - [x] Production deployment guide
@@ -158,12 +188,15 @@ The API will start on `http://localhost:8080`.
 ## API Endpoints
 
 ### Health Check
+
 ```
 GET /health
 ```
+
 Returns server health status.
 
 ### Upload Translation Request
+
 ```
 POST /api/translate
 Content-Type: multipart/form-data
@@ -183,6 +216,7 @@ Response 201:
 ```
 
 ### List Requests
+
 ```
 GET /api/requests?status=processing&limit=20&offset=0
 
@@ -196,6 +230,7 @@ Response 200:
 ```
 
 ### Get Request Status
+
 ```
 GET /api/requests/:id
 
@@ -212,6 +247,7 @@ Response 200:
 ```
 
 ### Get Translation Results
+
 ```
 GET /api/results/:id
 
@@ -229,6 +265,7 @@ Response 200:
 ```
 
 ### Real-time Progress Updates (SSE)
+
 ```
 GET /api/requests/:id/events
 Accept: text/event-stream
@@ -251,33 +288,37 @@ data: {"status":"failed","progress":0,"message":"Translation failed: ..."}
 ```
 
 **Usage with JavaScript:**
+
 ```javascript
-const eventSource = new EventSource(`http://localhost:8080/api/requests/${requestId}/events`);
+const eventSource = new EventSource(
+  `http://localhost:8080/api/requests/${requestId}/events`,
+);
 
-eventSource.addEventListener('connected', (e) => {
+eventSource.addEventListener("connected", (e) => {
   const data = JSON.parse(e.data);
-  console.log('Connected:', data);
+  console.log("Connected:", data);
 });
 
-eventSource.addEventListener('progress', (e) => {
+eventSource.addEventListener("progress", (e) => {
   const data = JSON.parse(e.data);
-  console.log('Progress:', data.progress, '%', data.message);
+  console.log("Progress:", data.progress, "%", data.message);
 });
 
-eventSource.addEventListener('complete', (e) => {
+eventSource.addEventListener("complete", (e) => {
   const data = JSON.parse(e.data);
-  console.log('Completed!');
+  console.log("Completed!");
   eventSource.close();
 });
 
-eventSource.addEventListener('error', (e) => {
+eventSource.addEventListener("error", (e) => {
   const data = JSON.parse(e.data);
-  console.error('Error:', data.message);
+  console.error("Error:", data.message);
   eventSource.close();
 });
 ```
 
 ### Serve Files
+
 ```
 GET /api/files/:requestId/:type/:filename
 
@@ -327,17 +368,17 @@ backend-api/
 
 All configuration is managed through environment variables (see `.env.example`):
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `PORT` | Server port | 8080 |
-| `DB_HOST` | PostgreSQL host | localhost |
-| `DB_PORT` | PostgreSQL port | 5432 |
-| `REDIS_ADDR` | Redis address | localhost:6379 |
-| `PYTHON_PATH` | Python executable path (⚠️ **must be venv**) | ../ai-worker/venv/Scripts/python.exe |
-| `WORKER_PATH` | AI worker directory | ../ai-worker |
-| `WORKER_CONCURRENCY` | Max concurrent jobs | 1 |
-| `MAX_UPLOAD_SIZE` | Max file size (bytes) | 104857600 (100MB) |
-| `CORS_ORIGINS` | Allowed CORS origins | http://localhost:3000 |
+| Variable             | Description                                  | Default                              |
+| -------------------- | -------------------------------------------- | ------------------------------------ |
+| `PORT`               | Server port                                  | 8080                                 |
+| `DB_HOST`            | PostgreSQL host                              | localhost                            |
+| `DB_PORT`            | PostgreSQL port                              | 5432                                 |
+| `REDIS_ADDR`         | Redis address                                | localhost:6379                       |
+| `PYTHON_PATH`        | Python executable path (⚠️ **must be venv**) | ../ai-worker/venv/Scripts/python.exe |
+| `WORKER_PATH`        | AI worker directory                          | ../ai-worker                         |
+| `WORKER_CONCURRENCY` | Max concurrent jobs                          | 1                                    |
+| `MAX_UPLOAD_SIZE`    | Max file size (bytes)                        | 104857600 (100MB)                    |
+| `CORS_ORIGINS`       | Allowed CORS origins                         | http://localhost:3000                |
 
 ### Running Tests
 
@@ -362,6 +403,7 @@ migrate create -ext sql -dir migrations -seq migration_name
 ```
 
 This creates two files:
+
 - `XXX_migration_name.up.sql` - Forward migration
 - `XXX_migration_name.down.sql` - Rollback migration
 
@@ -408,6 +450,7 @@ docker-compose down -v
 ```
 
 **Services included:**
+
 - `postgres` - PostgreSQL 16 database (port 5432)
 - `redis` - Redis cache & pub/sub (port 6379)
 - `api` - Backend API server (port 8080)
@@ -416,6 +459,7 @@ docker-compose down -v
 - `asynqmon` - Asynq monitoring UI (port 8081)
 
 **Access the application:**
+
 - Frontend: http://localhost:3000
 - Backend API: http://localhost:8080
 - Asynq Monitor: http://localhost:8081
@@ -447,14 +491,15 @@ When using Docker Compose from the root, environment variables are pre-configure
 
 ```yaml
 environment:
-  DB_HOST: postgres          # Use service name, not localhost
-  REDIS_ADDR: redis:6379     # Use service name, not localhost
-  PYTHON_PATH: /app/ai-worker/venv/bin/python  # Linux path in container
+  DB_HOST: postgres # Use service name, not localhost
+  REDIS_ADDR: redis:6379 # Use service name, not localhost
+  PYTHON_PATH: /app/ai-worker/venv/bin/python # Linux path in container
   WORKER_PATH: /app/ai-worker
   CORS_ORIGINS: http://localhost:3000
 ```
 
 **⚠️ Important Notes:**
+
 - The Python venv must be created on the host before building Docker images
 - Storage volumes are mounted from the host to persist uploaded/translated files
 - Database migrations run automatically on first startup
@@ -468,6 +513,7 @@ environment:
 **Cause**: The `PYTHON_PATH` is pointing to the system Python instead of the ai-worker venv.
 
 **Solution**:
+
 ```bash
 # Verify your .env file has the correct path
 # Windows:
@@ -481,6 +527,7 @@ PYTHON_PATH=../ai-worker/venv/bin/python
 ```
 
 If you haven't created the venv yet:
+
 ```bash
 cd ../ai-worker
 python -m venv venv
@@ -537,12 +584,14 @@ lsof -ti:8080 | xargs kill -9
 ## Contributing
 
 This backend follows Clean Architecture principles:
+
 - **Domain layer** contains pure business logic (no external dependencies)
 - **Ports** define interfaces
 - **Adapters** implement interfaces
 - **Dependencies flow inward** (adapters → ports → domain)
 
 When adding new features:
+
 1. Define domain entities in `internal/domain/`
 2. Define interfaces in `internal/ports/`
 3. Implement adapters in `internal/adapters/`
