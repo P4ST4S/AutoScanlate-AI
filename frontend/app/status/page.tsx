@@ -2,6 +2,7 @@ import { StatusList } from "@/components/features/StatusList";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Suspense } from "react";
 
 export default function StatusPage() {
   return (
@@ -11,7 +12,7 @@ export default function StatusPage() {
         <header className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Link href="/">
-              <Button variant="ghost" size="icon">
+              <Button variant="ghost" className="w-10 h-10 p-0">
                 <ArrowLeft className="w-6 h-6" />
               </Button>
             </Link>
@@ -23,7 +24,9 @@ export default function StatusPage() {
 
         {/* List */}
         <main>
-          <StatusList />
+          <Suspense fallback={<div>Loading...</div>}>
+            <StatusList />
+          </Suspense>
         </main>
       </div>
     </div>

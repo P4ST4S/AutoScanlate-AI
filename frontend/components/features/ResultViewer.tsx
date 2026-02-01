@@ -6,8 +6,10 @@ import { ArrowLeft, ArrowRight, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import type { Result } from "@/lib/mock-data";
+import type { Result } from "@/lib/api-client";
 import Link from "next/link"; // Correct import for Link inside component if needed, usually passed or used in page
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
 export function ResultViewer({ result }: { result: Result }) {
   const [currentPage, setCurrentPage] = useState(0);
@@ -15,8 +17,8 @@ export function ResultViewer({ result }: { result: Result }) {
 
   const totalPages = result.pages.length;
   const currentImage = showOriginal
-    ? result.pages[currentPage].original
-    : result.pages[currentPage].translated;
+    ? `${API_BASE_URL}${result.pages[currentPage].original}`
+    : `${API_BASE_URL}${result.pages[currentPage].translated}`;
 
   const handlePrev = () => setCurrentPage((p) => Math.max(0, p - 1));
   const handleNext = () =>
@@ -36,17 +38,15 @@ export function ResultViewer({ result }: { result: Result }) {
           <div className="flex items-center gap-2 bg-muted rounded-full p-1 border border-border">
             <Button
               variant={showOriginal ? "primary" : "ghost"}
-              size="sm"
               onClick={() => setShowOriginal(true)}
-              className="rounded-full"
+              className="rounded-full h-8 px-4 text-xs"
             >
               Original
             </Button>
             <Button
               variant={!showOriginal ? "primary" : "ghost"}
-              size="sm"
               onClick={() => setShowOriginal(false)}
-              className="rounded-full"
+              className="rounded-full h-8 px-4 text-xs"
             >
               Translated
             </Button>
@@ -56,17 +56,17 @@ export function ResultViewer({ result }: { result: Result }) {
         <div className="flex items-center gap-2">
           <Button
             variant="secondary"
-            size="icon"
             onClick={handlePrev}
             disabled={currentPage === 0}
+            className="w-10 h-10 p-0"
           >
             <ArrowLeft className="w-4 h-4" />
           </Button>
           <Button
             variant="secondary"
-            size="icon"
             onClick={handleNext}
             disabled={currentPage === totalPages - 1}
+            className="w-10 h-10 p-0"
           >
             <ArrowRight className="w-4 h-4" />
           </Button>

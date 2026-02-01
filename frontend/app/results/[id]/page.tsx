@@ -29,7 +29,7 @@ export default async function ResultPage(props: PageProps) {
     <div className="min-h-screen p-4 flex flex-col gap-4 bg-background font-sans">
       <header className="flex items-center gap-4">
         <Link href="/status">
-          <Button variant="ghost" size="icon">
+          <Button variant="ghost" className="w-10 h-10 p-0">
             <ArrowLeft className="w-6 h-6" />
           </Button>
         </Link>
