@@ -1,19 +1,25 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { useDropzone } from "react-dropzone";
 import { motion, AnimatePresence } from "framer-motion";
-import { Upload, FileArchive, X } from "lucide-react";
+import { Upload, FileArchive, X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { uploadFiles } from "@/lib/api-client";
 
 export function UploadZone() {
   const [files, setFiles] = useState<File[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     // Add all accepted files (zip archives and supported images) to the current list
     setFiles((prev) => [...prev, ...acceptedFiles]);
+    setError(null);
   }, []);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -32,6 +38,26 @@ export function UploadZone() {
     setFiles((prev) => prev.filter((f) => f !== fileToRemove));
   };
 
+  const handleUpload = async () => {
+    if (files.length === 0) return;
+
+    setUploading(true);
+    setError(null);
+
+    try {
+      const request = await uploadFiles(files);
+      console.log("Upload successful:", request);
+
+      // Redirect to status page to see progress
+      router.push(`/status?highlight=${request.id}`);
+    } catch (err) {
+      console.error("Upload failed:", err);
+      setError(err instanceof Error ? err.message : "Upload failed");
+    } finally {
+      setUploading(false);
+    }
+  };
+
   return (
     <div className="w-full max-w-2xl mx-auto space-y-8">
       <div
@@ -40,7 +66,7 @@ export function UploadZone() {
           "relative group cursor-pointer transition-all duration-300",
           "border-4 border-dashed border-border bg-background p-10 rounded-none",
           "hover:bg-muted/50 hover:border-accent",
-          isDragActive && "bg-accent/10 border-accent scale-[1.02]"
+          isDragActive && "bg-accent/10 border-accent scale-[1.02]",
         )}
       >
         <input {...getInputProps()} />
@@ -63,6 +89,14 @@ export function UploadZone() {
         {/* Screentone overlay for texture */}
         <div className="absolute inset-0 pointer-events-none screentone-bg z-0" />
       </div>
+
+      {error && (
+        <Card className="border-destructive bg-destructive/10">
+          <CardContent className="p-4">
+            <p className="text-destructive font-medium">{error}</p>
+          </CardContent>
+        </Card>
+      )}
 
       <AnimatePresence>
         {files.length > 0 && (
@@ -97,10 +131,18 @@ export function UploadZone() {
                   <Button
                     onClick={(e) => {
                       e.stopPropagation();
-                      alert("Upload logic to be implemented");
+                      handleUpload();
                     }}
+                    disabled={uploading}
                   >
-                    Start Translate
+                    {uploading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Uploading...
+                      </>
+                    ) : (
+                      "Start Translate"
+                    )}
                   </Button>
                 </div>
               </CardContent>

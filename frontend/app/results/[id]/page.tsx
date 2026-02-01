@@ -1,4 +1,4 @@
-import { mockResults } from "@/lib/mock-data";
+import { getResults } from "@/lib/api-client";
 import { ResultViewer } from "@/components/features/ResultViewer";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -10,11 +10,18 @@ interface PageProps {
 }
 
 export default async function ResultPage(props: PageProps) {
-  const params = await props.params; // Ensure to await params in Next.js 15+
+  const params = await props.params;
   const id = params.id;
-  const result = mockResults[id];
 
-  if (!result) {
+  let result;
+  try {
+    result = await getResults(id);
+  } catch (error) {
+    console.error("Failed to fetch results:", error);
+    return notFound();
+  }
+
+  if (!result || result.pages.length === 0) {
     return notFound();
   }
 

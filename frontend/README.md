@@ -13,9 +13,11 @@ The modern, responsive web interface for the AutoScanlate AI pipeline. Built wit
 
 ## <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/sparkles.svg" width="24" height="24" /> Key Features
 
-- **Upload Zone**: Drag & drop interface for `.zip` archives and images (`.png`, `.jpg`).
-- **Status Dashboard**: Real-time (mocked) tracking of translation requests with visual progress indicators.
+- **Upload Zone**: Drag & drop interface for `.zip` archives and images (`.png`, `.jpg`, `.webp`).
+- **Real API Integration**: Connected to Go backend for actual translation processing.
+- **Status Dashboard**: Real-time tracking with Server-Sent Events (SSE) for live progress updates.
 - **Results Viewer**: Side-by-side comparison reader for original vs. translated pages.
+- **Live Progress**: Auto-refreshing status with SSE for instant feedback during translation.
 
 ## <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/palette.svg" width="24" height="24" /> Design System (Manga Theme)
 
@@ -50,11 +52,42 @@ cd frontend
 pnpm install
 ```
 
-### Development
+### Configuration
 
-Run the development server:
+Create a `.env.local` file for environment variables:
 
 ```bash
+cp .env.local.example .env.local
+```
+
+The frontend needs to know where the backend API is running:
+
+```env
+# .env.local
+NEXT_PUBLIC_API_URL=http://localhost:8080
+```
+
+**Important**: Make sure the backend API is running before starting the frontend.
+
+### Development
+
+**1. Start the backend first:**
+
+```bash
+# In backend-api directory
+cd ../backend-api
+
+# Terminal 1: API Server
+./api.exe
+
+# Terminal 2: Worker
+./api.exe --mode=worker
+```
+
+**2. Start the frontend:**
+
+```bash
+# In frontend directory
 pnpm dev
 ```
 

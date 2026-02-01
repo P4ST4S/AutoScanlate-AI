@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import {
   CheckCircle2,
@@ -11,7 +13,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { mockRequests, type Request } from "@/lib/mock-data";
+import {
+  getRequests,
+  subscribeToProgress,
+  type Request,
+  type ProgressUpdate,
+} from "@/lib/api-client";
 import Link from "next/link";
 
 interface StatusConfigItem {
@@ -51,9 +58,115 @@ const statusConfig: Record<string, StatusConfigItem> = {
 };
 
 export function StatusList() {
+  const [requests, setRequests] = useState<Request[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const searchParams = useSearchParams();
+  const highlightId = searchParams.get("highlight");
+
+  useEffect(() => {
+    loadRequests();
+    const interval = setInterval(loadRequests, 5000); // Refresh every 5 seconds
+    return () => clearInterval(interval);
+  }, []);
+
+  // Subscribe to SSE for processing requests
+  useEffect(() => {
+    const processingRequests = requests.filter(
+      (r) => r.status === "processing" || r.status === "queued",
+    );
+    const eventSources: EventSource[] = [];
+
+    processingRequests.forEach((req) => {
+      const es = subscribeToProgress(
+        req.id,
+        (update: ProgressUpdate) => {
+          // Update progress in real-time
+          setRequests((prev) =>
+            prev.map((r) =>
+              r.id === req.id
+                ? {
+                    ...r,
+                    progress: update.progress,
+                    status: update.status as any,
+                  }
+                : r,
+            ),
+          );
+        },
+        (update: ProgressUpdate) => {
+          // Completed
+          setRequests((prev) =>
+            prev.map((r) =>
+              r.id === req.id
+                ? { ...r, status: "completed" as any, progress: 100 }
+                : r,
+            ),
+          );
+          loadRequests(); // Refresh to get final data
+        },
+        (error: string) => {
+          // Error
+          setRequests((prev) =>
+            prev.map((r) =>
+              r.id === req.id
+                ? { ...r, status: "failed" as any, errorMessage: error }
+                : r,
+            ),
+          );
+        },
+      );
+      eventSources.push(es);
+    });
+
+    return () => {
+      eventSources.forEach((es) => es.close());
+    };
+  }, [requests.map((r) => r.id + r.status).join(",")]);
+
+  async function loadRequests() {
+    try {
+      const data = await getRequests();
+      setRequests(data.requests);
+      setError(null);
+    } catch (err) {
+      console.error("Failed to load requests:", err);
+      setError(err instanceof Error ? err.message : "Failed to load requests");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="w-8 h-8 animate-spin text-accent" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card className="p-8 text-center border-destructive bg-destructive/10">
+        <AlertCircle className="w-12 h-12 mx-auto mb-4 text-destructive" />
+        <p className="text-destructive font-medium">{error}</p>
+      </Card>
+    );
+  }
+
+  if (requests.length === 0) {
+    return (
+      <Card className="p-8 text-center">
+        <p className="text-muted-foreground">
+          No translation requests yet. Upload some files to get started!
+        </p>
+      </Card>
+    );
+  }
+
   return (
     <div className="w-full max-w-4xl mx-auto space-y-4">
-      {mockRequests.map((req, index) => {
+      {requests.map((req, index) => {
         const config = statusConfig[req.status];
         const Icon = config.icon;
 
@@ -68,7 +181,7 @@ export function StatusList() {
               className={cn(
                 "group hover:shadow-[6px_6px_0px_var(--border)] transition-all duration-200",
                 req.status === "processing" &&
-                  "border-accent shadow-[4px_4px_0px_var(--accent)]"
+                  "border-accent shadow-[4px_4px_0px_var(--accent)]",
               )}
             >
               <div className="flex items-center p-4 gap-4">
@@ -76,7 +189,7 @@ export function StatusList() {
                 <div
                   className={cn(
                     "w-16 h-24 flex items-center justify-center border-2 border-border shrink-0 bg-background relative overflow-hidden",
-                    config.bg
+                    config.bg,
                   )}
                 >
                   {req.thumbnail ? (
@@ -90,7 +203,7 @@ export function StatusList() {
                       className={cn(
                         "w-8 h-8",
                         config.color,
-                        config.animate && "animate-spin"
+                        config.animate && "animate-spin",
                       )}
                     />
                   )}
@@ -105,7 +218,7 @@ export function StatusList() {
                     <span
                       className={cn(
                         "text-xs font-bold uppercase tracking-wider px-2 py-1 border border-current rounded-full",
-                        config.color
+                        config.color,
                       )}
                     >
                       {config.label}
