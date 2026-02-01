@@ -280,6 +280,57 @@ python main.py path/to/manga_chapter.zip
 - [ ] CI/CD pipeline (future)
 - [ ] Prometheus/Grafana monitoring (future)
 
+## <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/code.svg" width="24" height="24" /> Technical Skills Demonstrated
+
+This project showcases a comprehensive full-stack development skillset with modern technologies and architectural patterns:
+
+### Backend Development
+
+- **Go**: High-performance API with Fiber v3 framework, clean architecture principles
+- **PostgreSQL**: Database design, migrations, complex queries with pgx driver
+- **Redis**: Pub/sub messaging, caching, session management
+- **Queue Systems**: Asynq for distributed job processing and background tasks
+- **Real-time Communication**: Server-Sent Events (SSE) implementation with proper lifecycle management
+- **File Processing**: ZIP extraction, multi-format image handling, recursive directory operations
+- **Concurrency**: Goroutines, channels, context management, proper resource cleanup
+
+### Frontend Development
+
+- **Next.js 16**: Modern React framework with App Router, TypeScript
+- **Real-time UI**: EventSource API integration, live progress tracking, state management
+- **Responsive Design**: Tailwind CSS, component architecture, dark mode support
+- **API Integration**: RESTful client, error handling, file upload/download flows
+
+### AI/ML & Computer Vision
+
+- **Python**: Pipeline architecture, object-oriented design, type hints
+- **Deep Learning**: PyTorch, YOLO object detection, custom model inference
+- **LLM Integration**: llama.cpp, GGUF quantization, prompt engineering
+- **Computer Vision**: OpenCV, image processing, inpainting algorithms, threshold detection
+- **OCR**: MangaOCR integration, text detection, language processing
+
+### DevOps & Infrastructure
+
+- **Docker**: Multi-stage builds, docker-compose orchestration, container networking
+- **CI/CD Ready**: Structured for automated deployment pipelines
+- **Environment Management**: Configuration patterns, secret handling, multi-environment support
+- **Service Architecture**: Microservices, inter-service communication, process orchestration
+
+### Software Engineering Practices
+
+- **Architecture**: Hexagonal/Clean Architecture, separation of concerns, SOLID principles
+- **API Design**: RESTful conventions, proper HTTP semantics, error handling patterns
+- **Code Quality**: Type safety (Go, TypeScript), linting (Ruff, golangci-lint), modular design
+- **Documentation**: Comprehensive README files, inline comments, changelog management
+- **Version Control**: Git workflows, semantic versioning, project organization
+
+### Performance Optimization
+
+- **GPU Acceleration**: CUDA integration, VRAM management, 4-bit quantization
+- **Streaming**: Chunked processing, real-time progress reporting, buffering strategies
+- **Database**: Query optimization, indexing, connection pooling
+- **Caching**: Redis caching strategies, file system optimization
+
 ## <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/users.svg" width="24" height="24" /> Contributing
 
 We welcome contributions from the community! Whether you want to fix bugs, add features, improve documentation, or optimize performance, your help is appreciated.
