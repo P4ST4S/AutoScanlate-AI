@@ -12,11 +12,11 @@ The project follows a Microservices architecture to ensure the heavy AI processi
 
 ## <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/puzzle.svg" width="24" height="24" /> Project Structure
 
-| Module         | Status                                                                                                                         | Description                                                                           |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------- |
-| `/ai-worker`   | <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/circle-check.svg" width="24" height="24" /> v10.0   | The core Python engine. Handles Computer Vision, OCR, and LLM Inference on GPU.       |
+| Module         | Status                                                                                                                               | Description                                                                                   |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------- |
+| `/ai-worker`   | <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/circle-check.svg" width="24" height="24" /> v10.0         | The core Python engine. Handles Computer Vision, OCR, and LLM Inference on GPU.               |
 | `/backend-api` | <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/circle-check.svg" width="24" height="24" /> v1.0 Complete | High-performance Go API with real-time SSE progress, Redis pub/sub, and async job processing. |
-| `/frontend`    | <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/circle-check.svg" width="24" height="24" /> v0.1    | Modern Web UI (Next.js 16) for drag-and-drop uploads and reading translated chapters. |
+| `/frontend`    | <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/circle-check.svg" width="24" height="24" /> v1.0          | Modern Web UI (Next.js 16) for drag-and-drop uploads and reading translated chapters.         |
 
 ## <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/sparkles.svg" width="24" height="24" /> Key Features (AI Worker V10)
 
@@ -116,6 +116,7 @@ docker-compose up -d
 ```
 
 **Services included:**
+
 - PostgreSQL database
 - Redis cache & pub/sub
 - Backend Go API
@@ -196,12 +197,14 @@ python main.py path/to/manga_chapter.zip
 ## <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/map.svg" width="24" height="24" /> Roadmap
 
 ### AI Worker
+
 - [x] Core AI Pipeline (Detection, OCR, Translation, Inpainting)
 - [x] GPU Optimization (VRAM management, 4-bit quantization)
 - [x] Smart Typesetting (Pixel wrapping, box merging)
 - [x] Modular Code Architecture (Config, Services, Utils separation)
 
 ### Backend API (v1.0 - Complete ✅)
+
 - [x] Go/Fiber HTTP server with hexagonal architecture
 - [x] PostgreSQL database with migrations
 - [x] Asynq + Redis job queue
@@ -214,6 +217,7 @@ python main.py path/to/manga_chapter.zip
 - [ ] Unit & integration tests (future)
 
 ### Frontend (v0.1 - Complete ✅)
+
 - [x] Modern UI with Next.js 16 and Tailwind CSS
 - [x] Drag-and-drop file upload zone
 - [x] API integration with backend
@@ -224,6 +228,7 @@ python main.py path/to/manga_chapter.zip
 - [ ] User authentication (future)
 
 ### Infrastructure (Complete ✅)
+
 - [x] Docker Compose (one-command full stack deployment)
 - [x] PostgreSQL + Redis services
 - [x] Multi-container orchestration (API + Worker + Frontend)
