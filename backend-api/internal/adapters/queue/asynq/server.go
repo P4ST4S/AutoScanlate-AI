@@ -1,11 +1,15 @@
 package asynq
 
 import (
+	"archive/zip"
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
+	"sort"
+	"strings"
 
 	"github.com/P4ST4S/manga-translator/backend-api/internal/domain"
 	"github.com/P4ST4S/manga-translator/backend-api/internal/infrastructure/config"
@@ -229,16 +233,90 @@ func (qs *queueServer) processOutputFiles(
 
 	// For ZIP files, extract and organize pages
 	if fileType == "zip" {
-		// TODO: Extract ZIP and catalog pages
-		// For now, just move the translated ZIP
-		destPath := filepath.Join(translatedDir, filepath.Base(output.OutputPath))
-		if err := copyFile(output.OutputPath, destPath); err != nil {
-			return fmt.Errorf("failed to copy translated zip: %w", err)
+		// Extract original ZIP to originals directory
+		uploadPath := filepath.Join(qs.storagePath, "uploads", requestID.String())
+		originalZipPath := ""
+
+		// Find the original zip in uploads
+		entries, err := os.ReadDir(uploadPath)
+		if err == nil {
+			for _, entry := range entries {
+				if !entry.IsDir() && strings.HasSuffix(strings.ToLower(entry.Name()), ".zip") {
+					originalZipPath = filepath.Join(uploadPath, entry.Name())
+					break
+				}
+			}
+		}
+
+		// Extract original ZIP
+		if originalZipPath != "" {
+			if err := extractZip(originalZipPath, originalsDir); err != nil {
+				qs.logger.Error("failed to extract original zip", zap.Error(err))
+			} else {
+				qs.logger.Info("extracted original zip", zap.String("path", originalsDir))
+			}
+		}
+
+		// Extract translated ZIP
+		if err := extractZip(output.OutputPath, translatedDir); err != nil {
+			return fmt.Errorf("failed to extract translated zip: %w", err)
+		}
+
+		qs.logger.Info("extracted translated zip", zap.String("path", translatedDir))
+
+		// Collect all image files from extracted directories
+		originalFiles, err := collectImageFiles(originalsDir)
+		if err != nil {
+			return fmt.Errorf("failed to collect original images: %w", err)
+		}
+
+		translatedFiles, err := collectImageFiles(translatedDir)
+		if err != nil {
+			return fmt.Errorf("failed to collect translated images: %w", err)
+		}
+
+		// Sort files to match pages
+		sort.Strings(originalFiles)
+		sort.Strings(translatedFiles)
+
+		// Create result entries
+		results := make([]*domain.Result, 0, len(translatedFiles))
+		for i, translatedFile := range translatedFiles {
+			originalFile := ""
+			if i < len(originalFiles) {
+				originalFile = originalFiles[i]
+			}
+
+			// Create API paths using relative paths from the base directory
+			originalAPIPath := ""
+			if originalFile != "" {
+				relPath, _ := filepath.Rel(originalsDir, originalFile)
+				originalAPIPath = fmt.Sprintf("/api/files/%s/originals/%s", requestID, filepath.ToSlash(relPath))
+			}
+			relPath, _ := filepath.Rel(translatedDir, translatedFile)
+			translatedAPIPath := fmt.Sprintf("/api/files/%s/translated/%s", requestID, filepath.ToSlash(relPath))
+
+			result := domain.NewResult(requestID, i+1, originalAPIPath, translatedAPIPath)
+			results = append(results, result)
+		}
+
+		// Save results to database
+		if len(results) > 0 {
+			if err := qs.resultRepo.CreateBatch(ctx, results); err != nil {
+				return fmt.Errorf("failed to save results: %w", err)
+			}
+
+			// Update page count
+			req, err := qs.requestRepo.GetByID(ctx, requestID)
+			if err == nil {
+				req.PageCount = len(results)
+				qs.requestRepo.Update(ctx, req)
+			}
 		}
 
 		qs.logger.Info("processed zip output",
 			zap.String("request_id", requestID.String()),
-			zap.String("output_path", destPath),
+			zap.Int("pages", len(results)),
 		)
 
 		return nil
@@ -291,6 +369,79 @@ func copyFile(src, dst string) error {
 		return err
 	}
 	return os.WriteFile(dst, input, 0644)
+}
+
+// extractZip extracts a ZIP archive to the specified directory
+func extractZip(zipPath, destDir string) error {
+	reader, err := zip.OpenReader(zipPath)
+	if err != nil {
+		return fmt.Errorf("failed to open zip: %w", err)
+	}
+	defer reader.Close()
+
+	for _, file := range reader.File {
+		// Skip directories
+		if file.FileInfo().IsDir() {
+			continue
+		}
+
+		// Create destination path
+		destPath := filepath.Join(destDir, file.Name)
+
+		// Create parent directories
+		if err := os.MkdirAll(filepath.Dir(destPath), 0755); err != nil {
+			return fmt.Errorf("failed to create directory: %w", err)
+		}
+
+		// Extract file
+		rc, err := file.Open()
+		if err != nil {
+			return fmt.Errorf("failed to open file in zip: %w", err)
+		}
+
+		outFile, err := os.Create(destPath)
+		if err != nil {
+			rc.Close()
+			return fmt.Errorf("failed to create output file: %w", err)
+		}
+
+		_, err = io.Copy(outFile, rc)
+		outFile.Close()
+		rc.Close()
+
+		if err != nil {
+			return fmt.Errorf("failed to extract file: %w", err)
+		}
+	}
+
+	return nil
+}
+
+// collectImageFiles collects all image files from a directory
+func collectImageFiles(dir string) ([]string, error) {
+	var files []string
+	validExts := map[string]bool{
+		".jpg":  true,
+		".jpeg": true,
+		".png":  true,
+		".webp": true,
+		".bmp":  true,
+	}
+
+	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !info.IsDir() {
+			ext := strings.ToLower(filepath.Ext(path))
+			if validExts[ext] {
+				files = append(files, path)
+			}
+		}
+		return nil
+	})
+
+	return files, err
 }
 
 // asynqLogger adapts zap.Logger to asynq.Logger interface

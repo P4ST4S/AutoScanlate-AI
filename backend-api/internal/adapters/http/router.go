@@ -52,5 +52,5 @@ func SetupRoutes(
 
 	// File serving
 	filesHandler := handlers.NewFilesHandler(cfg, logger)
-	api.Get("/files/:requestId/:type/:filename", filesHandler.ServeFile)
+	api.Get("/files/:requestId/:type/*", filesHandler.ServeFile)
 }

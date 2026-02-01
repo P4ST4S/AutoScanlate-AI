@@ -21,11 +21,11 @@ func NewFilesHandler(cfg *config.Config, logger *zap.Logger) *FilesHandler {
 	}
 }
 
-// ServeFile handles GET /api/files/:requestId/:type/:filename
+// ServeFile handles GET /api/files/:requestId/:type/*
 func (h *FilesHandler) ServeFile(c *fiber.Ctx) error {
 	requestID := c.Params("requestId")
 	fileType := c.Params("type")
-	filename := c.Params("filename")
+	filePath := c.Params("*") // Capture the remaining path (can include subdirectories)
 
 	// Validate type
 	validTypes := map[string]bool{
@@ -40,17 +40,19 @@ func (h *FilesHandler) ServeFile(c *fiber.Ctx) error {
 		})
 	}
 
-	// Sanitize filename to prevent path traversal
-	filename = filepath.Base(filename)
-	if strings.Contains(filename, "..") {
+	// Sanitize file path to prevent path traversal
+	if strings.Contains(filePath, "..") {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "invalid filename",
+			"error": "invalid file path",
 		})
 	}
 
-	// Build file path
-	filePath := filepath.Join(h.storagePath, fileType, requestID, filename)
+	// Clean the path to normalize slashes
+	filePath = filepath.Clean(filePath)
+
+	// Build full file path
+	fullPath := filepath.Join(h.storagePath, fileType, requestID, filePath)
 
 	// Serve file
-	return c.SendFile(filePath)
+	return c.SendFile(fullPath)
 }

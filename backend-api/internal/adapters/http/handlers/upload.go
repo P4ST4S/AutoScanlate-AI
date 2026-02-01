@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"archive/zip"
 	"os"
 	"path/filepath"
 	"strings"
@@ -96,6 +97,17 @@ func (h *UploadHandler) Upload(c *fiber.Ctx) error {
 		})
 	}
 
+	// For ZIP files, count pages immediately
+	if fileType == "zip" {
+		pageCount, err := h.countImagesInZip(filePath)
+		if err != nil {
+			h.logger.Warn("failed to count images in zip", zap.Error(err))
+		} else {
+			request.PageCount = pageCount
+			h.logger.Info("counted pages in zip", zap.Int("pages", pageCount))
+		}
+	}
+
 	// Save request to database
 	if err := h.requestRepo.Create(c.Context(), request); err != nil {
 		h.logger.Error("failed to create request", zap.Error(err))
@@ -140,4 +152,33 @@ func (h *UploadHandler) getFileType(filename string) string {
 	}
 
 	return ""
+}
+
+// countImagesInZip counts the number of image files in a ZIP archive
+func (h *UploadHandler) countImagesInZip(zipPath string) (int, error) {
+	reader, err := zip.OpenReader(zipPath)
+	if err != nil {
+		return 0, err
+	}
+	defer reader.Close()
+
+	validExts := map[string]bool{
+		".jpg":  true,
+		".jpeg": true,
+		".png":  true,
+		".webp": true,
+		".bmp":  true,
+	}
+
+	count := 0
+	for _, file := range reader.File {
+		if !file.FileInfo().IsDir() {
+			ext := strings.ToLower(filepath.Ext(file.Name))
+			if validExts[ext] {
+				count++
+			}
+		}
+	}
+
+	return count, nil
 }
