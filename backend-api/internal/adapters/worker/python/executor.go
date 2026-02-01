@@ -175,13 +175,16 @@ func (e *pythonExecutor) findOutputFiles(inputPath string) (*ports.TranslationOu
 		Pages: []ports.PageOutput{},
 	}
 
+	// The Python worker creates output files in its working directory (ai-worker/)
+	// not in the directory of the input file
+	inputBase := filepath.Base(inputPath)
+	inputExt := filepath.Ext(inputBase)
+	inputName := strings.TrimSuffix(inputBase, inputExt)
+
 	// Check if input was a ZIP file
 	if strings.HasSuffix(strings.ToLower(inputPath), ".zip") {
-		// Look for {name}_translated.zip
-		dir := filepath.Dir(inputPath)
-		base := filepath.Base(inputPath)
-		nameWithoutExt := strings.TrimSuffix(base, filepath.Ext(base))
-		translatedZip := filepath.Join(dir, nameWithoutExt+"_translated.zip")
+		// Look for {name}_translated.zip in the worker directory
+		translatedZip := filepath.Join(e.workerPath, inputName+"_translated.zip")
 
 		if _, err := os.Stat(translatedZip); os.IsNotExist(err) {
 			return nil, fmt.Errorf("translated zip not found: %s", translatedZip)
@@ -196,28 +199,23 @@ func (e *pythonExecutor) findOutputFiles(inputPath string) (*ports.TranslationOu
 		return output, nil
 	}
 
-	// Single image file
-	dir := filepath.Dir(inputPath)
-	base := filepath.Base(inputPath)
-	translatedPath := filepath.Join(dir, "translated_"+base)
+	// Single image file - Python worker creates translated_{name}.jpg in worker directory
+	translatedPath := filepath.Join(e.workerPath, "translated_"+inputName+".jpg")
 
-	// Python worker outputs as .jpg
-	translatedPathJpg := strings.TrimSuffix(translatedPath, filepath.Ext(translatedPath)) + ".jpg"
-
-	if _, err := os.Stat(translatedPathJpg); os.IsNotExist(err) {
-		return nil, fmt.Errorf("translated image not found: %s", translatedPathJpg)
+	if _, err := os.Stat(translatedPath); os.IsNotExist(err) {
+		return nil, fmt.Errorf("translated image not found: %s", translatedPath)
 	}
 
-	output.OutputPath = translatedPathJpg
+	output.OutputPath = translatedPath
 	output.Pages = []ports.PageOutput{
 		{
 			PageNumber:     1,
 			OriginalPath:   inputPath,
-			TranslatedPath: translatedPathJpg,
+			TranslatedPath: translatedPath,
 		},
 	}
 
-	e.logger.Info("found translated image", zap.String("path", translatedPathJpg))
+	e.logger.Info("found translated image", zap.String("path", translatedPath))
 
 	return output, nil
 }
