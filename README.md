@@ -15,7 +15,7 @@ The project follows a Microservices architecture to ensure the heavy AI processi
 | Module         | Status                                                                                                                         | Description                                                                           |
 | -------------- | ------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------- |
 | `/ai-worker`   | <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/circle-check.svg" width="24" height="24" /> v10.0   | The core Python engine. Handles Computer Vision, OCR, and LLM Inference on GPU.       |
-| `/backend-api` | <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/circle-check.svg" width="24" height="24" /> v0.3 Phase 3 | High-performance Go API with real-time SSE progress, Redis pub/sub, and async job processing. |
+| `/backend-api` | <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/circle-check.svg" width="24" height="24" /> v1.0 Complete | High-performance Go API with real-time SSE progress, Redis pub/sub, and async job processing. |
 | `/frontend`    | <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/circle-check.svg" width="24" height="24" /> v0.1    | Modern Web UI (Next.js 16) for drag-and-drop uploads and reading translated chapters. |
 
 ## <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/sparkles.svg" width="24" height="24" /> Key Features (AI Worker V10)
@@ -86,37 +86,112 @@ See the V10 intelligent masked inpainting in action! These examples showcase the
 
 ---
 
-## <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/rocket.svg" width="24" height="24" /> Getting Started (Worker Only)
+## <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/rocket.svg" width="24" height="24" /> Quick Start
 
-Currently, you can run the worker as a CLI tool.
+### Option 1: Full Stack with Docker (Recommended)
 
-### Prerequisites
-
-- NVIDIA GPU with 6GB+ VRAM (Recommended: 8GB+).
-- CUDA Toolkit 12.x installed.
-- Python 3.10+.
-
-### Setup
-
-1. Navigate to the worker directory:
+Deploy the entire application (frontend + backend + AI worker) with one command:
 
 ```bash
+# Prerequisites: Docker Desktop installed
+# Clone the repository
+git clone <repository-url>
+cd manga-translator
+
+# Set up AI worker Python environment
 cd ai-worker
+python -m venv venv
+venv\Scripts\activate  # Windows
+# or: source venv/bin/activate  # Linux/Mac
+pip install -r requirements.txt
+cd ..
+
+# Start all services
+docker-compose up -d
+
+# Access the application
+# Frontend: http://localhost:3000
+# Backend API: http://localhost:8080
+# Asynq Monitor: http://localhost:8081
 ```
 
-2. Install dependencies (ensure CUDA support):
+**Services included:**
+- PostgreSQL database
+- Redis cache & pub/sub
+- Backend Go API
+- Asynq worker (background translation jobs)
+- Next.js frontend
+- Asynq monitoring UI
+
+### Option 2: Local Development
+
+Run each component separately for development:
+
+#### 1. Start Database Services
 
 ```bash
+cd backend-api
+docker-compose up -d postgres redis
+```
+
+#### 2. Set Up AI Worker
+
+```bash
+cd ../ai-worker
+python -m venv venv
+venv\Scripts\activate  # Windows
+# or: source venv/bin/activate  # Linux/Mac
 pip install -r requirements.txt
 ```
 
-See inner README for detailed llama-cpp-python compilation instructions.
-
-3. Run on an image or a zip file:
+#### 3. Run Backend
 
 ```bash
-python main.py ../my_manga_chapter.zip
+cd ../backend-api
+cp .env.example .env
+# Edit .env to configure paths (especially PYTHON_PATH)
+
+# Run migrations
+migrate -path ./migrations -database "postgres://manga_user:secure_pass@localhost:5432/manga_translator?sslmode=disable" up
+
+# Start API server
+go run ./cmd/api
+
+# In another terminal, start worker
+go run ./cmd/api --mode=worker
 ```
+
+#### 4. Run Frontend
+
+```bash
+cd ../frontend
+npm install  # or: pnpm install
+cp .env.local.example .env.local
+npm run dev  # or: pnpm dev
+```
+
+### Option 3: AI Worker Only (CLI)
+
+Use just the AI worker for command-line batch translation:
+
+```bash
+cd ai-worker
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
+
+# Translate a single image or ZIP file
+python main.py path/to/manga_chapter.zip
+```
+
+### System Requirements
+
+- **GPU**: NVIDIA GPU with 6GB+ VRAM (Recommended: 8GB+)
+- **CUDA**: CUDA Toolkit 12.x
+- **Python**: 3.10+
+- **Go**: 1.23+ (for backend development)
+- **Node.js**: 20+ (for frontend development)
+- **Docker**: Docker Desktop (for containerized deployment)
 
 ## <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/map.svg" width="24" height="24" /> Roadmap
 
@@ -126,7 +201,7 @@ python main.py ../my_manga_chapter.zip
 - [x] Smart Typesetting (Pixel wrapping, box merging)
 - [x] Modular Code Architecture (Config, Services, Utils separation)
 
-### Backend API
+### Backend API (v1.0 - Complete ✅)
 - [x] Go/Fiber HTTP server with hexagonal architecture
 - [x] PostgreSQL database with migrations
 - [x] Asynq + Redis job queue
@@ -134,18 +209,27 @@ python main.py ../my_manga_chapter.zip
 - [x] File upload and validation
 - [x] SSE real-time progress tracking
 - [x] Redis pub/sub for event broadcasting
-- [ ] Production Docker deployment (Phase 4)
-- [ ] Unit & integration tests (Phase 4)
+- [x] Docker multi-stage build
+- [x] Production Docker Compose orchestration
+- [ ] Unit & integration tests (future)
 
-### Frontend
-- [x] Frontend UI (Next.js 16, File upload zone, Gallery)
-- [ ] API integration with backend
-- [ ] Real-time progress updates
+### Frontend (v0.1 - Complete ✅)
+- [x] Modern UI with Next.js 16 and Tailwind CSS
+- [x] Drag-and-drop file upload zone
+- [x] API integration with backend
+- [x] Real-time SSE progress tracking
+- [x] Translation status dashboard
+- [x] Interactive result viewer (original/translated toggle)
+- [ ] Thumbnail generation (future)
+- [ ] User authentication (future)
 
-### Infrastructure
-- [ ] Docker Compose (One command deployment)
-- [ ] CI/CD pipeline
-- [ ] Production monitoring
+### Infrastructure (Complete ✅)
+- [x] Docker Compose (one-command full stack deployment)
+- [x] PostgreSQL + Redis services
+- [x] Multi-container orchestration (API + Worker + Frontend)
+- [x] Asynq monitoring UI
+- [ ] CI/CD pipeline (future)
+- [ ] Prometheus/Grafana monitoring (future)
 
 ## <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/handshake.svg" width="24" height="24" /> Credits
 

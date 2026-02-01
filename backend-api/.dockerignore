@@ -1,0 +1,36 @@
+# Git
+.git
+.gitignore
+
+# Development
+*.exe
+*.test
+*.out
+api
+api.exe
+
+# Storage (will be mounted as volume)
+storage/
+
+# Documentation
+README.md
+docs/
+
+# Environment
+.env
+.env.local
+
+# Docker
+docker-compose.yml
+Dockerfile
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary files
+tmp/
+temp/

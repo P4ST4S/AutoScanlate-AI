@@ -36,10 +36,11 @@ High-performance Go backend API for the Manga Translator project. Orchestrates f
 - [x] Event streaming (connected/progress/complete/error)
 - [ ] Cleanup service (Phase 4)
 
-### Phase 4: Production
-- [ ] Docker multi-stage build
-- [ ] Unit + integration tests
-- [ ] Production deployment guide
+### Phase 4: Production ✅ Complete
+- [x] Docker multi-stage build
+- [x] Docker Compose orchestration
+- [x] Production deployment guide
+- [ ] Unit + integration tests (future)
 
 ## Prerequisites
 
@@ -381,27 +382,82 @@ Configure via `LOG_LEVEL` environment variable.
 
 ## Docker Deployment
 
-### Build Docker Image
+### Option 1: Full Stack with Root docker-compose.yml (Recommended)
+
+From the project root, you can deploy the entire stack (frontend + backend + services):
+
+```bash
+cd ..  # Navigate to project root
+
+# Build and start all services (frontend, backend, postgres, redis, worker, asynqmon)
+docker-compose up -d
+
+# View logs for all services
+docker-compose logs -f
+
+# View logs for specific service
+docker-compose logs -f api
+docker-compose logs -f worker
+docker-compose logs -f frontend
+
+# Stop all services
+docker-compose down
+
+# Stop and remove volumes (will delete database data)
+docker-compose down -v
+```
+
+**Services included:**
+- `postgres` - PostgreSQL 16 database (port 5432)
+- `redis` - Redis cache & pub/sub (port 6379)
+- `api` - Backend API server (port 8080)
+- `worker` - Asynq worker process (background jobs)
+- `frontend` - Next.js frontend (port 3000)
+- `asynqmon` - Asynq monitoring UI (port 8081)
+
+**Access the application:**
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:8080
+- Asynq Monitor: http://localhost:8081
+
+### Option 2: Backend Services Only (Local Development)
+
+If you want to run the backend services with Docker but develop the API locally:
+
+```bash
+# From backend-api directory
+docker-compose up -d postgres redis
+
+# Run API locally
+go run ./cmd/api
+
+# Run worker locally (in another terminal)
+go run ./cmd/api --mode=worker
+```
+
+### Build Docker Image Manually
 
 ```bash
 docker build -t manga-translator-api .
 ```
 
-### Run with Docker Compose
+### Environment Variables for Docker
 
-```bash
-# Start all services (PostgreSQL + Redis + API)
-docker-compose up -d
+When using Docker Compose from the root, environment variables are pre-configured. For custom deployments, ensure these are set:
 
-# View logs
-docker-compose logs -f api
-
-# Stop services
-docker-compose down
-
-# Stop and remove volumes
-docker-compose down -v
+```yaml
+environment:
+  DB_HOST: postgres          # Use service name, not localhost
+  REDIS_ADDR: redis:6379     # Use service name, not localhost
+  PYTHON_PATH: /app/ai-worker/venv/bin/python  # Linux path in container
+  WORKER_PATH: /app/ai-worker
+  CORS_ORIGINS: http://localhost:3000
 ```
+
+**⚠️ Important Notes:**
+- The Python venv must be created on the host before building Docker images
+- Storage volumes are mounted from the host to persist uploaded/translated files
+- Database migrations run automatically on first startup
 
 ## Troubleshooting
 
