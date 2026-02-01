@@ -236,6 +236,38 @@ python main.py path/to/manga_chapter.zip
 - [ ] CI/CD pipeline (future)
 - [ ] Prometheus/Grafana monitoring (future)
 
+## <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/users.svg" width="24" height="24" /> Contributing
+
+We welcome contributions from the community! Whether you want to fix bugs, add features, improve documentation, or optimize performance, your help is appreciated.
+
+**Before contributing:**
+
+- 📖 Read our [CONTRIBUTING.md](CONTRIBUTING.md) guide
+- 💬 Open an Issue to discuss significant changes (especially for `/ai-worker` modifications)
+- ✅ Follow code standards: Ruff (Python), golangci-lint (Go), ESLint (Frontend)
+- 🧪 Include tests and documentation with your changes
+
+**Languages:** Contributions can be made in French or English.
+
+## <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/scale.svg" width="24" height="24" /> License
+
+This project is licensed under a **Custom Non-Commercial Open Source License**.
+
+**You are free to:**
+
+- ✅ Use, modify, and distribute for personal, educational, or research purposes
+- ✅ Fork and create derivative works (non-commercial)
+- ✅ Contribute back to the project
+
+**Restrictions:**
+
+- ❌ Commercial use requires explicit permission from the author
+- 📧 For commercial licensing: contact@antoinerospars.dev
+
+See [LICENSE](LICENSE) for full terms.
+
+Copyright (c) 2026 P4ST4S / Antoine Rospars
+
 ## <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/handshake.svg" width="24" height="24" /> Credits
 
 - **Models**: Qwen (Alibaba Cloud), YOLOv8 (Ultralytics), MangaOCR (kha-white).
