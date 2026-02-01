@@ -29,11 +29,12 @@ High-performance Go backend API for the Manga Translator project. Orchestrates f
 - [x] Worker mode (separate process)
 - [x] End-to-end translation flow
 
-### Phase 3: Real-time & Advanced
-- [ ] SSE progress tracking
-- [ ] Redis pub/sub integration
-- [ ] File serving endpoint
-- [ ] Cleanup service
+### Phase 3: Real-time & Advanced ✅ Complete
+- [x] SSE progress tracking
+- [x] Redis pub/sub integration
+- [x] Real-time progress broadcasting
+- [x] Event streaming (connected/progress/complete/error)
+- [ ] Cleanup service (Phase 4)
 
 ### Phase 4: Production
 - [ ] Docker multi-stage build
@@ -224,6 +225,55 @@ Response 200:
     }
   ]
 }
+```
+
+### Real-time Progress Updates (SSE)
+```
+GET /api/requests/:id/events
+Accept: text/event-stream
+
+Event Stream:
+event: connected
+data: {"status":"queued","progress":0,"message":"Connected to progress stream"}
+
+event: progress
+data: {"status":"processing","progress":25,"message":"Processing page 5/18"}
+
+event: progress
+data: {"status":"processing","progress":50,"message":"Processing page 9/18"}
+
+event: complete
+data: {"status":"completed","progress":100,"message":"Translation completed successfully"}
+
+event: error
+data: {"status":"failed","progress":0,"message":"Translation failed: ..."}
+```
+
+**Usage with JavaScript:**
+```javascript
+const eventSource = new EventSource(`http://localhost:8080/api/requests/${requestId}/events`);
+
+eventSource.addEventListener('connected', (e) => {
+  const data = JSON.parse(e.data);
+  console.log('Connected:', data);
+});
+
+eventSource.addEventListener('progress', (e) => {
+  const data = JSON.parse(e.data);
+  console.log('Progress:', data.progress, '%', data.message);
+});
+
+eventSource.addEventListener('complete', (e) => {
+  const data = JSON.parse(e.data);
+  console.log('Completed!');
+  eventSource.close();
+});
+
+eventSource.addEventListener('error', (e) => {
+  const data = JSON.parse(e.data);
+  console.error('Error:', data.message);
+  eventSource.close();
+});
 ```
 
 ### Serve Files

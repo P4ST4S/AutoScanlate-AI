@@ -15,7 +15,7 @@ The project follows a Microservices architecture to ensure the heavy AI processi
 | Module         | Status                                                                                                                         | Description                                                                           |
 | -------------- | ------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------- |
 | `/ai-worker`   | <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/circle-check.svg" width="24" height="24" /> v10.0   | The core Python engine. Handles Computer Vision, OCR, and LLM Inference on GPU.       |
-| `/backend-api` | <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/circle-check.svg" width="24" height="24" /> v0.2 Phase 2 | High-performance Go API with Fiber, PostgreSQL, Asynq queue, and Python worker integration. |
+| `/backend-api` | <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/circle-check.svg" width="24" height="24" /> v0.3 Phase 3 | High-performance Go API with real-time SSE progress, Redis pub/sub, and async job processing. |
 | `/frontend`    | <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/circle-check.svg" width="24" height="24" /> v0.1    | Modern Web UI (Next.js 16) for drag-and-drop uploads and reading translated chapters. |
 
 ## <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/sparkles.svg" width="24" height="24" /> Key Features (AI Worker V10)
@@ -132,8 +132,10 @@ python main.py ../my_manga_chapter.zip
 - [x] Asynq + Redis job queue
 - [x] Python worker subprocess integration
 - [x] File upload and validation
-- [ ] SSE real-time progress tracking (Phase 3)
+- [x] SSE real-time progress tracking
+- [x] Redis pub/sub for event broadcasting
 - [ ] Production Docker deployment (Phase 4)
+- [ ] Unit & integration tests (Phase 4)
 
 ### Frontend
 - [x] Frontend UI (Next.js 16, File upload zone, Gallery)

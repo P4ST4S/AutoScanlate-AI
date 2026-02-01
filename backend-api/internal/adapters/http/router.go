@@ -42,6 +42,10 @@ func SetupRoutes(
 	api.Get("/requests", requestsHandler.List)
 	api.Get("/requests/:id", requestsHandler.GetByID)
 
+	// Events handler (SSE)
+	eventsHandler := handlers.NewEventsHandler(requestRepo, cfg, logger)
+	api.Get("/requests/:id/events", eventsHandler.StreamProgress)
+
 	// Results handler
 	resultsHandler := handlers.NewResultsHandler(requestRepo, resultRepo, logger)
 	api.Get("/results/:id", resultsHandler.GetByRequestID)

@@ -9,6 +9,7 @@ import (
 
 	"github.com/P4ST4S/manga-translator/backend-api/internal/domain"
 	"github.com/P4ST4S/manga-translator/backend-api/internal/infrastructure/config"
+	"github.com/P4ST4S/manga-translator/backend-api/internal/infrastructure/pubsub"
 	"github.com/P4ST4S/manga-translator/backend-api/internal/ports"
 	"github.com/google/uuid"
 	"github.com/hibiken/asynq"
@@ -23,6 +24,7 @@ type queueServer struct {
 	resultRepo  ports.ResultRepository
 	executor    ports.WorkerExecutor
 	storagePath string
+	publisher   *pubsub.Publisher
 }
 
 // NewQueueServer creates a new Asynq queue server
@@ -57,6 +59,12 @@ func NewQueueServer(
 		},
 	)
 
+	// Create Redis publisher for progress updates
+	publisher, err := pubsub.NewPublisher(&cfg.Redis, logger)
+	if err != nil {
+		logger.Fatal("failed to create publisher", zap.Error(err))
+	}
+
 	qs := &queueServer{
 		server:      server,
 		mux:         asynq.NewServeMux(),
@@ -65,6 +73,7 @@ func NewQueueServer(
 		resultRepo:  resultRepo,
 		executor:    executor,
 		storagePath: cfg.Storage.Path,
+		publisher:   publisher,
 	}
 
 	// Register task handlers
@@ -124,7 +133,16 @@ func (qs *queueServer) handleTranslationTask(ctx context.Context, task *asynq.Ta
 			}
 		}
 
-		// TODO: Publish to Redis pub/sub for SSE (Phase 3)
+		// Publish to Redis pub/sub for SSE
+		update := pubsub.ProgressUpdate{
+			RequestID: requestID,
+			Status:    string(domain.StatusProcessing),
+			Progress:  progress,
+			Message:   message,
+		}
+		if err := qs.publisher.PublishProgress(ctx, update); err != nil {
+			qs.logger.Error("failed to publish progress", zap.Error(err))
+		}
 	}
 
 	output, err := qs.executor.Translate(ctx, payload.FilePath, progressCallback)
@@ -139,6 +157,17 @@ func (qs *queueServer) handleTranslationTask(ctx context.Context, task *asynq.Ta
 		if req != nil {
 			req.SetError(err.Error())
 			qs.requestRepo.Update(ctx, req)
+		}
+
+		// Publish error event
+		errorUpdate := pubsub.ProgressUpdate{
+			RequestID: requestID,
+			Status:    string(domain.StatusFailed),
+			Progress:  0,
+			Message:   fmt.Sprintf("Translation failed: %s", err.Error()),
+		}
+		if pubErr := qs.publisher.PublishProgress(ctx, errorUpdate); pubErr != nil {
+			qs.logger.Error("failed to publish error", zap.Error(pubErr))
 		}
 
 		return fmt.Errorf("translation failed: %w", err)
@@ -157,6 +186,17 @@ func (qs *queueServer) handleTranslationTask(ctx context.Context, task *asynq.Ta
 	if err := qs.requestRepo.UpdateStatus(ctx, requestID, domain.StatusCompleted, 100); err != nil {
 		qs.logger.Error("failed to update status to completed", zap.Error(err))
 		return fmt.Errorf("failed to update status: %w", err)
+	}
+
+	// Publish completion event
+	completeUpdate := pubsub.ProgressUpdate{
+		RequestID: requestID,
+		Status:    string(domain.StatusCompleted),
+		Progress:  100,
+		Message:   "Translation completed successfully",
+	}
+	if err := qs.publisher.PublishProgress(ctx, completeUpdate); err != nil {
+		qs.logger.Error("failed to publish completion", zap.Error(err))
 	}
 
 	qs.logger.Info("translation task completed",
