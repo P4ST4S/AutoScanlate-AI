@@ -132,48 +132,60 @@ Place these files in the `ai-worker/models/` directory.
 
 ## <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/rocket.svg" width="24" height="24" /> Quick Start
 
-### Option 1: Hybrid (Recommended for Windows)
+### Option 1: One-command start (Recommended)
 
-Docker runs the infrastructure and web services. The AI worker runs natively on Windows to access your GPU directly.
+Two launcher scripts are provided at the project root. They handle everything: Docker services, the Go worker, and opening your browser automatically.
+
+**Prerequisites:** Docker Desktop, Go 1.23+, Python 3.10+, CUDA 12.x
+
+#### First-time setup
 
 ```bash
-# Prerequisites: Docker Desktop, Go 1.23+, Python 3.10+, CUDA 12.x
 # Clone the repository
 git clone <repository-url>
 cd manga-translator
 
-# 1. Set up AI worker Python environment (Windows)
+# Set up the Python AI worker environment (once)
 cd ai-worker
 python -m venv venv
+
+# Windows:
 venv\Scripts\activate
+# Linux/Mac:
+# source venv/bin/activate
+
 pip install -r requirements.txt
 cd ..
-
-# 2. Start infrastructure + API + frontend via Docker
-docker compose up -d
-
-# 3. Run the Go worker on the host (in a separate terminal)
-#    It connects to Docker's Redis/Postgres on localhost
-cd backend-api
-go run ./cmd/api --mode=worker
-
-# Access the application
-# Frontend: http://localhost:3000
-# Backend API: http://localhost:8080
-# Asynq Monitor: http://localhost:8081
 ```
 
-**Docker services:**
+#### Launch
 
-- PostgreSQL database
-- Redis cache & pub/sub
-- Backend Go API
-- Next.js frontend
-- Asynq monitoring UI
+**Windows:**
 
-**Host (Windows):**
+```bat
+run.bat
+```
 
-- Go worker process — spawns the Python AI pipeline with GPU access
+**Linux / Mac:**
+
+```bash
+chmod +x run.sh
+./run.sh
+```
+
+Both scripts will:
+
+1. Start all Docker services (PostgreSQL, Redis, Go API, Next.js frontend, Asynqmon)
+2. Launch the Go worker in a separate terminal window (uses your GPU via the local Python venv)
+3. Open `http://localhost:3000` in your default browser
+
+| Service | URL |
+|---------|-----|
+| Frontend | http://localhost:3000 |
+| Backend API | http://localhost:8080 |
+| Asynq Monitor | http://localhost:8081 |
+
+> **Why a hybrid setup?** The AI pipeline (`llama-cpp-python`, PyTorch CUDA) requires direct GPU access which Docker on Windows cannot provide without the NVIDIA Container Toolkit. The Go worker runs natively on the host and spawns Python as a subprocess, while all other services run in Docker for easy reproducibility.
 
 ### Option 2: Local Development
 

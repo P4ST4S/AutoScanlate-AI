@@ -7,3 +7,4 @@ venv/
 /models/8b/*
 /models/14b/*
 /temp/*
+translated_*
