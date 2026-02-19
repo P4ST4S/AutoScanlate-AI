@@ -18,20 +18,42 @@ import (
 )
 
 type pythonExecutor struct {
-	pythonPath string
-	workerPath string
-	timeout    int
-	logger     *zap.Logger
+	pythonPath      string
+	workerPath      string
+	timeout         int
+	logger          *zap.Logger
+	dockerStorePath string // e.g. "/app/storage" — rewritten to localStorePath
+	localStorePath  string // e.g. "C:\Users\...\storage"
 }
 
 // NewPythonExecutor creates a new Python worker executor
-func NewPythonExecutor(cfg *config.WorkerConfig, logger *zap.Logger) ports.WorkerExecutor {
+func NewPythonExecutor(cfg *config.WorkerConfig, storageCfg *config.StorageConfig, logger *zap.Logger) ports.WorkerExecutor {
+	localPath, _ := filepath.Abs(storageCfg.Path)
 	return &pythonExecutor{
-		pythonPath: cfg.PythonPath,
-		workerPath: cfg.WorkerPath,
-		timeout:    int(cfg.Timeout.Seconds()),
-		logger:     logger,
+		pythonPath:      cfg.PythonPath,
+		workerPath:      cfg.WorkerPath,
+		timeout:         int(cfg.Timeout.Seconds()),
+		logger:          logger,
+		dockerStorePath: storageCfg.DockerPath,
+		localStorePath:  localPath,
 	}
+}
+
+// rewritePath replaces the Docker container storage prefix with the local path.
+// This is needed when the API runs in Docker (storing paths like /app/storage/...)
+// but the worker runs on the host and needs the real local path.
+func (e *pythonExecutor) rewritePath(path string) string {
+	if e.dockerStorePath == "" {
+		return path
+	}
+	// Normalise to forward slashes for prefix matching
+	normalised := filepath.ToSlash(path)
+	dockerPrefix := filepath.ToSlash(e.dockerStorePath)
+	if strings.HasPrefix(normalised, dockerPrefix) {
+		rel := strings.TrimPrefix(normalised, dockerPrefix)
+		return filepath.Join(e.localStorePath, filepath.FromSlash(rel))
+	}
+	return path
 }
 
 func (e *pythonExecutor) Translate(
@@ -39,13 +61,16 @@ func (e *pythonExecutor) Translate(
 	inputPath string,
 	onProgress ports.ProgressCallback,
 ) (*ports.TranslationOutput, error) {
+	// Rewrite Docker container path to local host path if needed
+	inputPath = e.rewritePath(inputPath)
+
 	e.logger.Info("starting translation",
 		zap.String("input_path", inputPath),
 	)
 
 	// Create job-specific temp directory
 	jobID := uuid.New().String()
-	tempDir := filepath.Join("storage", "temp", jobID)
+	tempDir := filepath.Join(e.localStorePath, "temp", jobID)
 	if err := os.MkdirAll(tempDir, 0755); err != nil {
 		return nil, fmt.Errorf("failed to create temp directory: %w", err)
 	}
@@ -60,7 +85,7 @@ func (e *pythonExecutor) Translate(
 		return nil, fmt.Errorf("Python worker not found at: %s", mainPyPath)
 	}
 
-	// Convert to absolute path for Python
+	// inputPath is already absolute after rewritePath; ensure it's absolute
 	absInputPath, err := filepath.Abs(inputPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get absolute path: %w", err)

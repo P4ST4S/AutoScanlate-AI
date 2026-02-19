@@ -132,26 +132,30 @@ Place these files in the `ai-worker/models/` directory.
 
 ## <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/rocket.svg" width="24" height="24" /> Quick Start
 
-### Option 1: Full Stack with Docker (Recommended)
+### Option 1: Hybrid (Recommended for Windows)
 
-Deploy the entire application (frontend + backend + AI worker) with one command:
+Docker runs the infrastructure and web services. The AI worker runs natively on Windows to access your GPU directly.
 
 ```bash
-# Prerequisites: Docker Desktop installed
+# Prerequisites: Docker Desktop, Go 1.23+, Python 3.10+, CUDA 12.x
 # Clone the repository
 git clone <repository-url>
 cd manga-translator
 
-# Set up AI worker Python environment
+# 1. Set up AI worker Python environment (Windows)
 cd ai-worker
 python -m venv venv
-venv\Scripts\activate  # Windows
-# or: source venv/bin/activate  # Linux/Mac
+venv\Scripts\activate
 pip install -r requirements.txt
 cd ..
 
-# Start all services
-docker-compose up -d
+# 2. Start infrastructure + API + frontend via Docker
+docker compose up -d
+
+# 3. Run the Go worker on the host (in a separate terminal)
+#    It connects to Docker's Redis/Postgres on localhost
+cd backend-api
+go run ./cmd/api --mode=worker
 
 # Access the application
 # Frontend: http://localhost:3000
@@ -159,14 +163,17 @@ docker-compose up -d
 # Asynq Monitor: http://localhost:8081
 ```
 
-**Services included:**
+**Docker services:**
 
 - PostgreSQL database
 - Redis cache & pub/sub
 - Backend Go API
-- Asynq worker (background translation jobs)
 - Next.js frontend
 - Asynq monitoring UI
+
+**Host (Windows):**
+
+- Go worker process — spawns the Python AI pipeline with GPU access
 
 ### Option 2: Local Development
 

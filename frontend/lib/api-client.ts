@@ -1,6 +1,11 @@
 // API Client for Manga Translator Backend
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+// On the server (SSR/RSC), use API_URL (internal Docker service name).
+// On the client (browser), use NEXT_PUBLIC_API_URL (public hostname).
+const API_BASE_URL =
+  (typeof window === "undefined"
+    ? process.env.API_URL
+    : process.env.NEXT_PUBLIC_API_URL) || "http://localhost:8080";
 
 export interface Request {
   id: string;

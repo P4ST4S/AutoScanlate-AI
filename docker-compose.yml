@@ -11,10 +11,11 @@ services:
       POSTGRES_DB: manga_translator
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./backend-api/migrations:/docker-entrypoint-initdb.d
     ports:
       - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U manga_user"]
+      test: ["CMD-SHELL", "pg_isready -U manga_user -d manga_translator"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -40,8 +41,8 @@ services:
   # Backend API (Go)
   api:
     build:
-      context: ./backend-api
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: backend-api/Dockerfile
     container_name: manga-translator-api
     ports:
       - "8080:8080"
@@ -64,7 +65,6 @@ services:
       CORS_ORIGINS: http://localhost:3000
     volumes:
       - ./storage:/app/storage
-      - ./ai-worker:/app/ai-worker
     depends_on:
       postgres:
         condition: service_healthy
@@ -72,38 +72,6 @@ services:
         condition: service_healthy
     networks:
       - manga-network
-
-  # Worker Process (Asynq consumer)
-  worker:
-    build:
-      context: ./backend-api
-      dockerfile: Dockerfile
-    container_name: manga-translator-worker
-    command: ["./api", "--mode=worker"]
-    environment:
-      ENV: production
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_USER: manga_user
-      DB_PASSWORD: secure_pass
-      DB_NAME: manga_translator
-      REDIS_ADDR: redis:6379
-      PYTHON_PATH: /app/ai-worker/venv/bin/python
-      WORKER_PATH: /app/ai-worker
-      WORKER_CONCURRENCY: 1
-      WORKER_TIMEOUT: 600
-    volumes:
-      - ./storage:/app/storage
-      - ./ai-worker:/app/ai-worker
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    networks:
-      - manga-network
-    deploy:
-      replicas: 1
 
   # Frontend (Next.js)
   frontend:
@@ -115,6 +83,7 @@ services:
       - "3000:3000"
     environment:
       NEXT_PUBLIC_API_URL: http://localhost:8080
+      API_URL: http://api:8080
     depends_on:
       - api
     networks:

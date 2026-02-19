@@ -127,7 +127,7 @@ func runWorker(
 	resultRepo ports.ResultRepository,
 ) {
 	// Initialize Python executor
-	executor := python.NewPythonExecutor(&cfg.Worker, logger)
+	executor := python.NewPythonExecutor(&cfg.Worker, &cfg.Storage, logger)
 
 	// Initialize queue server
 	queueServer := asynq.NewQueueServer(cfg, logger, requestRepo, resultRepo, executor)

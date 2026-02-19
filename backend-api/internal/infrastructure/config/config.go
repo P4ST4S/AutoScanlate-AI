@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/spf13/viper"
@@ -48,6 +49,7 @@ type WorkerConfig struct {
 type StorageConfig struct {
 	Path          string
 	MaxUploadSize int64
+	DockerPath    string // Docker container's storage path, used by host worker to rewrite paths
 }
 
 type CORSConfig struct {
@@ -68,7 +70,9 @@ func Load() (*Config, error) {
 	// Read .env file if it exists (not required in production)
 	if err := viper.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
-			return nil, fmt.Errorf("error reading config file: %w", err)
+			if !os.IsNotExist(err) {
+				return nil, fmt.Errorf("error reading config file: %w", err)
+			}
 		}
 		// Config file not found; using environment variables only
 	}
@@ -101,6 +105,7 @@ func Load() (*Config, error) {
 		Storage: StorageConfig{
 			Path:          getEnvOrDefault("STORAGE_PATH", "./storage"),
 			MaxUploadSize: int64(getIntOrDefault("MAX_UPLOAD_SIZE", 104857600)), // 100MB
+			DockerPath:    getEnvOrDefault("STORAGE_PATH_DOCKER", ""),
 		},
 		CORS: CORSConfig{
 			Origins: viper.GetStringSlice("CORS_ORIGINS"),

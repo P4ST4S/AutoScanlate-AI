@@ -1,4 +1,5 @@
 # Build stage
+# Build context is the project root (set in docker-compose.yml)
 FROM golang:1.24-alpine AS builder
 
 WORKDIR /build
@@ -7,11 +8,11 @@ WORKDIR /build
 RUN apk add --no-cache git
 
 # Copy go mod files
-COPY go.mod go.sum ./
+COPY backend-api/go.mod backend-api/go.sum ./
 RUN go mod download
 
 # Copy source code
-COPY . .
+COPY backend-api/ .
 
 # Build binary
 RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-w -s" -o api ./cmd/api
@@ -19,8 +20,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-w -s" -o api ./cmd/api
 # Runtime stage
 FROM alpine:latest
 
-# Install runtime dependencies
-RUN apk --no-cache add ca-certificates python3 py3-pip tzdata
+RUN apk --no-cache add ca-certificates tzdata
 
 WORKDIR /app
 
@@ -28,7 +28,7 @@ WORKDIR /app
 COPY --from=builder /build/api .
 
 # Copy migrations
-COPY migrations ./migrations
+COPY backend-api/migrations ./migrations
 
 # Create storage directories
 RUN mkdir -p storage/uploads storage/originals storage/translated storage/temp

@@ -1,0 +1,52 @@
+# Git
+.git
+.gitignore
+
+# Windows Python venv (not usable on Linux)
+ai-worker/venv/
+
+# Large model files (mounted as volume at runtime)
+ai-worker/models/*.gguf
+ai-worker/models/*.pt
+ai-worker/models/7b/
+ai-worker/models/8b/
+ai-worker/models/14b/
+
+# Python cache
+ai-worker/__pycache__/
+ai-worker/**/__pycache__/
+ai-worker/core/__pycache__/
+
+# Storage (mounted as volume)
+storage/
+
+# Frontend (not needed for backend build)
+frontend/
+
+# Development files
+*.exe
+*.test
+*.out
+backend-api/api
+backend-api/api.exe
+
+# Environment
+.env
+.env.local
+
+# Documentation
+README.md
+docs/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary files
+tmp/
+temp/
+runs/
+nul
