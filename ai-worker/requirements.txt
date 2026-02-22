@@ -18,3 +18,7 @@ torchaudio
 
 # --- LLM ---
 llama-cpp-python
+
+# --- Inpainting (Phase 2, optional) ---
+# Uncomment to enable LaMa neural inpainting (set INPAINT_BACKEND="lama" in config/settings.py)
+# iopaint>=0.30.0

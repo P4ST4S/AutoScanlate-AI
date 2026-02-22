@@ -73,8 +73,12 @@ class MangaPipeline:
 
         boxes = consolidate_boxes(boxes)
 
-        # Process each text box
+        # Process each text box — three passes:
+        # 1. OCR + translate all boxes
+        # 2. Clean all boxes in one operation (single LaMa pass if using LaMa backend)
+        # 3. Render translated text
         if boxes:
+            translations = []
             for box in boxes:
                 x1, y1, x2, y2 = box
                 crop = original_img.crop((x1, y1, x2, y2))
@@ -88,8 +92,14 @@ class MangaPipeline:
                     continue
 
                 fr_text = self.translator.translate(jap_text)
-                self.typesetter.clean_box(original_img, box)
-                self.typesetter.draw_text(original_img, fr_text, box)
+                translations.append((box, fr_text))
+
+            if translations:
+                self.typesetter.clean_all_boxes(
+                    original_img, [b for b, _ in translations]
+                )
+                for box, fr_text in translations:
+                    self.typesetter.draw_text(original_img, fr_text, box)
 
         # Save output
         if output_path:
