@@ -1,6 +1,6 @@
 # Manga Translator Backend API
 
-**Version 2.0** - High-performance Go backend API for the Manga Translator project. Orchestrates file uploads, job queuing, and translation processing between the Next.js frontend and Python AI worker.
+**Version 2.1** - High-performance Go backend API for the Manga Translator project. Orchestrates file uploads, job queuing, and translation processing between the Next.js frontend and Python AI worker.
 
 ## Architecture
 
@@ -33,6 +33,18 @@
 - ✅ **Enhanced error logging** with detailed debugging information
 - ✅ **Progress parsing** with regex patterns for structured updates
 - ✅ **Type-safe progress callbacks** throughout the pipeline
+
+## What's New in v2.1
+
+### Windows Subprocess Fix
+
+- ✅ **`PYTHONIOENCODING=utf-8`** added to Python subprocess environment — prevents `UnicodeEncodeError` crash (`exit status 0xc0000005`) when emoji characters are printed to piped stdout on Windows
+- ✅ **`MangaOcr(force_cpu=True)`** — avoids CUDA context conflict between llama-cpp-python and the transformers ViT model on Windows
+
+### Launcher Scripts
+
+- ✅ **`run.bat` / `run.sh`** — one-command startup for the full stack
+- ✅ **Auto storage directory creation** — pre-creates `storage/` subdirectories before Docker Compose starts, preventing bind-mount failures
 
 ## Project Status
 
@@ -505,6 +517,44 @@ environment:
 - Database migrations run automatically on first startup
 
 ## Troubleshooting
+
+### Python Worker Crashes on Windows (`exit status 0xc0000005`)
+
+**Symptom**: Worker logs show `worker process failed: exit status 0xc0000005` after the pipeline prints `✅ LLM loaded.` or `⏳ Loading LLM...`.
+
+**Cause**: When Python is spawned as a subprocess with piped stdout (by the Go worker), it defaults to the Windows legacy `cp1252` encoding. Any emoji character (e.g. `⏳`, `✅`) in the Python output causes a fatal `UnicodeEncodeError`.
+
+**Solution**: Already fixed in v2.1 — `PYTHONIOENCODING=utf-8` is set in `executor.go`. If you see this on an older version, add it manually:
+
+```go
+cmd.Env = append(os.Environ(),
+    "PYTHONUNBUFFERED=1",
+    "PYTHONIOENCODING=utf-8",
+)
+```
+
+### MangaOCR Crash / CUDA Context Conflict
+
+**Symptom**: Pipeline loads LLM and YOLO successfully but crashes during MangaOCR initialization, often with a segfault or access violation.
+
+**Cause**: On Windows, `llama-cpp-python` and `transformers` (used by manga-ocr) can conflict when sharing the same CUDA context. Installing packages like `diffusers`, `accelerate`, or `IOPaint` into the same venv can exacerbate this.
+
+**Solution**: Already fixed in v2.1 — `MangaOcr(force_cpu=True)` is used in `pipeline.py`. MangaOCR is a small model and runs fast on CPU.
+
+### Docker Storage Bind-Mount Failure (`mkdir /app/storage: file exists`)
+
+**Symptom**: API container logs show `failed to create upload directory: mkdir /app/storage: file exists`.
+
+**Cause**: The `./storage` directory didn't exist on the host when Docker Compose first ran. Docker auto-created it as a regular file instead of a directory. The bind-mount then exposed a file at `/app/storage`, breaking `os.MkdirAll`.
+
+**Solution**: Create the storage directories on the host before starting Docker:
+
+```bash
+mkdir -p storage/uploads storage/originals storage/translated storage/temp
+docker compose down && docker compose up -d
+```
+
+The `run.bat` / `run.sh` launchers do this automatically.
 
 ### Python Worker Fails / ModuleNotFoundError
 

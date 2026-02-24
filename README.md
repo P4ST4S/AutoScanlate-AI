@@ -19,8 +19,20 @@ The project follows a Microservices architecture to ensure the heavy AI processi
 | Module         | Status                                                                                                                          | Description                                                                                                      |
 | -------------- | ------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
 | `/ai-worker`   | <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/circle-check.svg" width="24" height="24" /> v10.0    | The core Python engine. Handles Computer Vision, OCR, and LLM Inference on GPU.                                  |
-| `/backend-api` | <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/circle-check.svg" width="24" height="24" /> **v2.0** | High-performance Go API with **real-time SSE progress**, Redis pub/sub, ZIP extraction, and nested file support. |
+| `/backend-api` | <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/circle-check.svg" width="24" height="24" /> **v2.1** | High-performance Go API with **real-time SSE progress**, Redis pub/sub, ZIP extraction, and nested file support. |
 | `/frontend`    | <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/circle-check.svg" width="24" height="24" /> v1.0     | Modern Web UI (Next.js 16) for drag-and-drop uploads and reading translated chapters.                            |
+
+## <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/rocket.svg" width="24" height="24" /> What's New in Backend v2.1
+
+### 🪟 Windows Subprocess Fix
+
+- **Python worker no longer crashes** when spawned by the Go worker on Windows — root cause was `UnicodeEncodeError` on emoji characters printed to piped stdout (cp1252 fallback). Fixed with `PYTHONIOENCODING=utf-8`.
+- **MangaOCR now uses CPU** (`force_cpu=True`) to avoid a CUDA context conflict with llama-cpp-python on Windows.
+
+### 🚀 One-Command Launcher
+
+- **`run.bat` / `run.sh`** — starts the entire stack (Docker services + Go worker + browser) with a single double-click
+- **Auto storage directory creation** — prevents Docker bind-mount failures when `./storage` doesn't exist yet
 
 ## <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/rocket.svg" width="24" height="24" /> What's New in Backend v2.0
 
@@ -175,9 +187,10 @@ chmod +x run.sh
 
 Both scripts will:
 
-1. Start all Docker services (PostgreSQL, Redis, Go API, Next.js frontend, Asynqmon)
-2. Launch the Go worker in a separate terminal window (uses your GPU via the local Python venv)
-3. Open `http://localhost:3000` in your default browser
+1. Create `storage/` subdirectories if missing (prevents Docker bind-mount failures)
+2. Start all Docker services (PostgreSQL, Redis, Go API, Next.js frontend, Asynqmon)
+3. Launch the Go worker in a separate terminal window (uses your GPU via the local Python venv)
+4. Open `http://localhost:3000` in your default browser
 
 | Service | URL |
 |---------|-----|

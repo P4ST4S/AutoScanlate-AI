@@ -5,6 +5,32 @@ All notable changes to the Manga Translator Backend API will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2026-02-24
+
+### Added
+
+- **`run.bat` launcher**: One-command startup script for Windows — starts Docker services, creates storage directories, launches the Go worker in a separate window, and opens the browser automatically
+- **`run.sh` launcher**: Equivalent startup script for Linux/Mac
+- **Auto storage directory creation**: `run.bat`/`run.sh` now create `storage/uploads`, `storage/originals`, `storage/translated`, and `storage/temp` if missing, preventing Docker bind-mount failures
+- **`PYTHONIOENCODING=utf-8` env var**: Added to the Python subprocess environment in `executor.go` to prevent `UnicodeEncodeError` crashes when emoji characters (e.g. `⏳`, `✅`) are printed to piped stdout on Windows
+
+### Fixed
+
+- **Python worker crash (`exit status 0xc0000005`)**: Worker subprocess was crashing with an access violation on Windows when spawned by the Go worker. Root cause: Python fell back to `cp1252` encoding for piped stdout, and emoji characters in `translation.py` caused a fatal `UnicodeEncodeError`. Fixed by setting `PYTHONIOENCODING=utf-8` in the subprocess environment.
+- **MangaOCR GPU conflict**: `MangaOcr()` now initializes with `force_cpu=True` to avoid a CUDA context conflict between llama-cpp-python and the transformers ViT model when both are loaded in the same process on Windows
+- **Docker storage bind-mount failure** (`mkdir /app/storage: file exists`): Caused by a missing `./storage` directory on the host — Docker auto-created it as a file instead of a directory. Fixed by pre-creating the directory structure in `run.bat`/`run.sh` and via `docker-compose.yml` volume mount ordering
+
+### Changed
+
+- **AI pipeline loading order**: LLM is now loaded before YOLO and MangaOCR to avoid GPU context initialization conflicts on Windows
+- **`manga-ocr` pinned to `0.1.13`** in `requirements.txt` for stability
+
+### Technical Details
+
+- `executor.go`: Added `PYTHONIOENCODING=utf-8` alongside existing `PYTHONUNBUFFERED=1`
+- `pipeline.py`: Changed `MangaOcr()` → `MangaOcr(force_cpu=True)` and reordered model loading (LLM → YOLO → OCR)
+- `run.bat`: Added storage directory pre-creation block before Docker Compose startup
+
 ## [2.0.0] - 2026-02-01
 
 ### Added
@@ -72,5 +98,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Version History
 
+- **v2.1.0** (2026-02-24): Windows subprocess fix, storage directory auto-creation, `run.bat`/`run.sh` launchers
 - **v2.0.0** (2026-02-01): Real-time SSE progress, ZIP extraction, subdirectory support
 - **v1.0.0** (2025-12-15): Initial release with core features

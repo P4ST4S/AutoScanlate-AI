@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [10.1.0] - 2026-02-24
+
+### Added
+
+- `manga-ocr==0.1.13` pinned in `requirements.txt` for stability against upstream regressions
+
+### Changed
+
+- **MangaOCR initialized with `force_cpu=True`** — avoids a CUDA context conflict with `llama-cpp-python` on Windows when both are loaded in the same process (symptoms: segfault or `exit status 0xc0000005` after `✅ LLM loaded.`)
+- **AI pipeline loading order**: LLM is now loaded first (before YOLO and MangaOCR) to establish the llama.cpp CUDA context before PyTorch initializes
+
+### Fixed
+
+- **Pipeline crash when spawned by Go worker on Windows**: Python subprocess fell back to `cp1252` encoding for piped stdout; emoji characters (`⏳`, `✅`) caused a fatal `UnicodeEncodeError`. Fixed on the Go side by setting `PYTHONIOENCODING=utf-8`, and on the Python side by ensuring no encoding-sensitive output happens before the env var is applied.
+- **MangaOCR / transformers ViT segfault**: Third-party package installation (e.g. `IOPaint`, `diffusers`, `accelerate`) into the same venv could corrupt the shared GPU context used by manga-ocr's transformers model. `force_cpu=True` is the stable workaround.
+
 ## [10.0.0] - 2025-12-08
 
 ### Added
@@ -74,7 +90,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Version History Summary
 
-- **v10.0.0** - Intelligent Masked Inpainting (Current)
+- **v10.1.0** - Windows subprocess fix, MangaOCR CPU mode, pipeline load order (Current)
+- **v10.0.0** - Intelligent Masked Inpainting
 - **v9.0.0** - Smart Box Merging & Anti-Thinking Prompts
 - **v8.0.0** - Initial Public Release
 
