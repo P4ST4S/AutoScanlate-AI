@@ -98,7 +98,8 @@ func (e *pythonExecutor) Translate(
 	// Set environment variables with unbuffered Python output
 	cmd.Env = append(os.Environ(),
 		fmt.Sprintf("TEMP_DIR=%s", tempDir),
-		"PYTHONUNBUFFERED=1", // Force unbuffered stdout/stderr
+		"PYTHONUNBUFFERED=1",    // Force unbuffered stdout/stderr
+		"PYTHONIOENCODING=utf-8", // Force UTF-8 for stdout/stderr pipes on Windows
 	)
 
 	// Capture stdout and stderr

@@ -12,6 +12,15 @@ if errorlevel 1 (
     exit /b 1
 )
 
+:: Create storage directories if not present
+echo Creating storage directories if needed...
+if not exist "storage\uploads"    mkdir "storage\uploads"
+if not exist "storage\originals"  mkdir "storage\originals"
+if not exist "storage\translated" mkdir "storage\translated"
+if not exist "storage\temp"       mkdir "storage\temp"
+echo [OK] Storage directories ready.
+echo.
+
 :: Start Docker services (infra + api + frontend)
 echo [1/2] Starting Docker services...
 docker compose up -d --build

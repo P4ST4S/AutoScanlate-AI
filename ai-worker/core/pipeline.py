@@ -35,9 +35,9 @@ class MangaPipeline:
             print(f"❌ Missing YOLO model: {YOLO_MODEL_NAME}")
             sys.exit(1)
 
-        self.detector = YOLO(YOLO_MODEL_NAME)
-        self.mocr = MangaOcr()
         self.translator = LocalTranslator(MODEL_PATH)
+        self.detector = YOLO(YOLO_MODEL_NAME)
+        self.mocr = MangaOcr(force_cpu=True)
         self.typesetter = Typesetter(FONT_PATH)
         print("✅ Pipeline Ready (V10 - Stable | Masked Inpainting).", flush=True)
 
