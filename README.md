@@ -154,7 +154,7 @@ Two launcher scripts are provided at the project root. They handle everything: D
 
 ```bash
 # Clone the repository
-git clone <repository-url>
+git clone https://github.com/P4ST4S/AutoScanlate-AI
 cd manga-translator
 
 # Set up the Python AI worker environment (once)
