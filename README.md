@@ -148,7 +148,9 @@ Place these files in the `ai-worker/models/` directory.
 
 Two launcher scripts are provided at the project root. They handle everything: Docker services, the Go worker, and opening your browser automatically.
 
-**Prerequisites:** Docker Desktop, Go 1.23+, Python 3.10+, CUDA 12.x
+**Prerequisites:** Docker Desktop, Go 1.23+, Python 3.10–3.12, CUDA 12.x
+
+Python 3.13+ is unsupported because the project requires `numpy<2.0.0`.
 
 #### First-time setup
 
@@ -265,7 +267,7 @@ python main.py path/to/manga_chapter.zip
 
 - **GPU**: NVIDIA GPU with 6GB+ VRAM (Recommended: 8GB+)
 - **CUDA**: CUDA Toolkit 12.x
-- **Python**: 3.10+
+- **Python**: 3.10–3.12 (Python 3.13+ is unsupported because the project requires `numpy<2.0.0`)
 - **Go**: 1.23+ (for backend development)
 - **Node.js**: 20+ (for frontend development)
 - **Docker**: Docker Desktop (for containerized deployment)

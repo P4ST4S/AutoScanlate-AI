@@ -31,7 +31,7 @@ This project uses a combination of state-of-the-art AI models to **Detect**, **R
 ## 🛠️ Prerequisites
 
 - **OS**: Windows / Linux
-- **Python**: 3.10 or higher
+- **Python**: 3.10–3.12 (Python 3.13+ is unsupported because the project requires `numpy<2.0.0`)
 - **GPU**: NVIDIA RTX series recommended (Min 6GB VRAM for 7B models, 8GB+ preferred).
 - **System Tools**: NVIDIA CUDA Toolkit 12.x installed.
 
